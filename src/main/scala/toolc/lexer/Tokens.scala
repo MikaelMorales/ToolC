@@ -50,6 +50,9 @@ object Tokens {
   case class PRINTLN()    extends Token // println
   case class DO()         extends Token // do(expr)
 
+  //Extension for the project
+  case class VALUE()      extends Token // value
+
   // Identifiers
   case class ID(val value: String) extends Token with TerminalClass
 

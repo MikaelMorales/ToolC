@@ -42,10 +42,11 @@ object Main {
     val ctx = processOptions(args)
 
     val pipeline = Lexer andThen
-                   Parser andThen
+                   DisplayTokens
+                   /*Parser andThen
                    NameAnalysis andThen
                    TypeChecking andThen
-                   CodeGeneration
+                   CodeGeneration*/
 
     pipeline.run(ctx)(ctx.files.head)
 
