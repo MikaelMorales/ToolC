@@ -4,6 +4,7 @@ import java.io.File
 
 import toolc.lexer._
 import toolc.utils._
+import toolc.ast._
 
 object Main {
 
@@ -38,8 +39,7 @@ object Main {
     val ctx = processOptions(args)
 
     val pipeline = Lexer andThen
-                    DisplayTokens
-//                   Parser andThen
+                   Parser
 //                   NameAnalysis andThen
 //                   TypeChecking andThen
 //                   CodeGeneration
