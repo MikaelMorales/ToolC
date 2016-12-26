@@ -1,13 +1,9 @@
 package toolc
 
-import utils._
 import java.io.File
 
-import lexer._
-import ast._
-import eval._
-import analyzer._
-import code._
+import toolc.lexer._
+import toolc.utils._
 
 object Main {
 
@@ -42,11 +38,11 @@ object Main {
     val ctx = processOptions(args)
 
     val pipeline = Lexer andThen
-                   DisplayTokens
-                   /*Parser andThen
-                   NameAnalysis andThen
-                   TypeChecking andThen
-                   CodeGeneration*/
+                    DisplayTokens
+//                   Parser andThen
+//                   NameAnalysis andThen
+//                   TypeChecking andThen
+//                   CodeGeneration
 
     pipeline.run(ctx)(ctx.files.head)
 
