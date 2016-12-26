@@ -15,6 +15,10 @@ object Trees {
       case cs: ClassSymbol =>
         TClass(cs)
 
+      /* Project Extension */
+      case vcs: ValueClassSymbol =>
+        TValueClass(vcs)
+
       case ms: MethodSymbol =>
         sys.error("Requesting type of a method identifier.")
 
@@ -37,17 +41,16 @@ object Trees {
     val parent: Option[Identifier]
     val vars: List[VarDecl]
   }
-  case class Program(main: MainObject, classes: List[ClassDecl])
+  case class Program(main: MainObject, classes: List[Class])
     extends DefTree
   case class MainObject(id: Identifier, stats: List[StatTree])
     extends DefTree with Symbolic[MainSymbol]
   case class ClassDecl(id: Identifier, parent: Option[Identifier], vars: List[VarDecl], methods: List[MethodDecl])
     extends Class with Symbolic[ClassSymbol]
   /* Project extension */
-  case class ValueClassDecl(id: Identifier, field: VarDecl, methods: List[MethodDecl])
+  case class ValueClassDecl(id: Identifier, vars: List[VarDecl], methods: List[MethodDecl])
     extends Class with Symbolic[ValueClassSymbol] {
     override val parent = None
-    override val vars = List(field)
   }
 
   case class VarDecl(tpe: TypeTree, id: Identifier)

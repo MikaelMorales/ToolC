@@ -25,10 +25,10 @@ class ASTConstructor {
     }
   }
 
-  def constructClass(ptree: NodeOrLeaf[Token]): ClassDecl = {
+  def constructClass(ptree: NodeOrLeaf[Token]): Class = {
     ptree match {
       case Node(
-        'ClassDeclaration ::=  _,
+        'ClassDeclaration ::= List(CLASS(), _, _, _),
         List(Leaf(cls), id, optextends, Node('ClassBody ::= _, List(_, vardecls, methoddecls, _)))
       ) =>
         ClassDecl(
@@ -37,6 +37,16 @@ class ASTConstructor {
           constructList(vardecls, constructVarDecl),
           constructList(methoddecls, constructMethodDecl)
         ).setPos(cls)
+
+      case Node(
+      'ClassDeclaration ::= List(VALUE(), _, _, _),
+      List(Leaf(value), _, id, Node('ClassBody ::= _, List(_, vardecls, methoddecls, _)))
+      ) =>
+        ValueClassDecl(
+          constructId(id),
+          constructList(vardecls, constructVarDecl),
+          constructList(methoddecls, constructMethodDecl)
+        ).setPos(value)
     }
   }
 
@@ -166,6 +176,9 @@ class ASTConstructor {
         NewIntArray(constructExpr(e)).setPos(nt)
       case Node('Expression ::= List(NEW(), 'Identifier, LPAREN(), RPAREN()), List(Leaf(nt), id, _, _)) =>
         New(constructId(id)).setPos(nt)
+      /*Project extension */
+      case Node('Expression ::= List(NEW(), 'Identifier, LPAREN(), 'Expression, RPAREN()), List(Leaf(nt), id, _ ,e, _)) =>
+        NewValueClass(constructId(id), constructExpr(e)).setPos(nt)
       case Node('Expression ::= List(BANG(), 'Expression), List(Leaf(bt), e)) =>
         Not(constructExpr(e)).setPos(bt)
       case Node('Expression ::= List(LPAREN(), 'Expression, RPAREN()), List(Leaf(lp), e, _)) =>
