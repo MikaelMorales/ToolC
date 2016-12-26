@@ -33,7 +33,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
     case "new"      => Some(NEW())
     case "println"  => Some(PRINTLN())
     case "do"       => Some(DO())
-    case "value"    => Some(VALUE())
+    case "value"    => Some(VALUE()) //Extension for the project
     case _          => None
   }
 
@@ -131,7 +131,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
           if(nextChar == '=') {
             consume(2)
             EQUALS()
-          }else{
+          } else {
             consume()
             EQSIGN()
           }
