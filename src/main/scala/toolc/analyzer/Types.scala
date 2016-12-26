@@ -48,6 +48,10 @@ object Types {
     override def toString = classSymbol.name
   }
 
+  case class TValueClass(valueClassSymbol: ValueClassSymbol) extends Type {
+    override def toString = valueClassSymbol.name
+  }
+
   // The top of the class hierarchy. Does not correspond to anything in a Tool program,
   // we just use if for convenience during type checking.
   val TObject = TClass(new ClassSymbol("Object"))

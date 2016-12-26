@@ -15,6 +15,10 @@ object Trees {
       case cs: ClassSymbol =>
         TClass(cs)
 
+      /* Project Extension */
+      case vcs: ValueClassSymbol =>
+        TValueClass(vcs)
+
       case ms: MethodSymbol =>
         sys.error("Requesting type of a method identifier.")
 
@@ -27,14 +31,28 @@ object Trees {
     override def toString = value
   }
 
+
   // Definitions
   sealed trait DefTree extends Tree
-  case class Program(main: MainObject, classes: List[ClassDecl])
+  /* Project extension */
+  sealed trait Class extends DefTree{
+    val id: Identifier
+    val methods: List[MethodDecl]
+    val parent: Option[Identifier]
+    val vars: List[VarDecl]
+  }
+  case class Program(main: MainObject, classes: List[Class])
     extends DefTree
   case class MainObject(id: Identifier, stats: List[StatTree])
     extends DefTree with Symbolic[MainSymbol]
   case class ClassDecl(id: Identifier, parent: Option[Identifier], vars: List[VarDecl], methods: List[MethodDecl])
-    extends DefTree with Symbolic[ClassSymbol]
+    extends Class with Symbolic[ClassSymbol]
+  /* Project extension */
+  case class ValueClassDecl(id: Identifier, vars: List[VarDecl], methods: List[MethodDecl])
+    extends Class with Symbolic[ValueClassSymbol] {
+    override val parent = None
+  }
+
   case class VarDecl(tpe: TypeTree, id: Identifier)
     extends DefTree with Symbolic[VariableSymbol]
   case class MethodDecl(id: Identifier,
@@ -147,12 +165,22 @@ object Trees {
       }
     }
   }
+
   case class New(tpe: Identifier) extends ExprTree {
     def getType = tpe.getType match {
       case t@TClass(_) => t
       case other => TError
     }
   }
+
+  /* Project Extension */
+  case class NewValueClass(tpe: Identifier, expr: ExprTree) extends ExprTree{
+    def getType = tpe.getType match {
+      case t@TValueClass(_) => t
+      case other => TError
+    }
+  }
+
   // Literals
   case class IntLit(value: Int) extends ExprTree {
     val getType = TInt

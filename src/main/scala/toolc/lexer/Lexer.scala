@@ -33,7 +33,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
     case "new"      => Some(NEW())
     case "println"  => Some(PRINTLN())
     case "do"       => Some(DO())
-    case "value"    => Some(VALUE()) //Extension for the project
+    case "cvalue"    => Some(VALUE()) //Extension for the project
     case _          => None
   }
 

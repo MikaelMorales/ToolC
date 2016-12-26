@@ -18,7 +18,7 @@ object Parser extends Pipeline[Iterator[Token], Program] {
     'MainObject ::= PROGRAM() ~ 'Identifier ~ LBRACE() ~ 'Stmts ~ RBRACE(),
     'Stmts ::= 'Statement ~ 'Stmts | epsilon(),
     'ClassDecls ::= 'ClassDeclaration ~ 'ClassDecls | epsilon(),
-    'ClassDeclaration ::= CLASS() ~ 'Identifier ~ 'OptExtends ~ 'ClassBody,
+    'ClassDeclaration ::= CLASS() ~ 'Identifier ~ 'OptExtends ~ 'ClassBody | VALUE() ~ CLASS() ~ 'Identifier ~ 'ClassBody,
     'OptExtends ::= epsilon() | EXTENDS() ~ 'Identifier,
     'ClassBody ::= LBRACE() ~ 'VarDecs ~ 'MethodDecs ~ RBRACE(),
     'VarDecs ::= 'VarDeclaration ~ 'VarDecs | epsilon(),
@@ -49,6 +49,7 @@ object Parser extends Pipeline[Iterator[Token], Program] {
       | TRUE() | FALSE() | 'Identifier | THIS()
       | NEW() ~ INT() ~ LBRACKET() ~ 'Expression ~ RBRACKET()
       | NEW() ~ 'Identifier ~ LPAREN() ~ RPAREN()
+      | NEW() ~ 'Identifier ~ LPAREN() ~ 'Expression ~ RPAREN()
       | BANG() ~ 'Expression
       | LPAREN() ~ 'Expression ~ RPAREN(),
     'Args ::= epsilon() | 'Expression ~ 'ExprList,
@@ -63,7 +64,7 @@ object Parser extends Pipeline[Iterator[Token], Program] {
     'MainObject ::= PROGRAM() ~ 'Identifier ~ LBRACE() ~ 'Stmts ~ RBRACE(),
     'Stmts ::= 'Statement ~ 'Stmts | epsilon(),
     'ClassDecls ::= 'ClassDeclaration ~ 'ClassDecls | epsilon(),
-    'ClassDeclaration ::= CLASS() ~ 'Identifier ~ 'OptExtends ~ 'ClassBody,
+    'ClassDeclaration ::= CLASS() ~ 'Identifier ~ 'OptExtends ~ 'ClassBody | VALUE() ~ CLASS() ~ 'Identifier ~ 'ClassBody,
     'OptExtends ::= epsilon() | EXTENDS() ~ 'Identifier,
     'ClassBody ::= LBRACE() ~ 'VarDecs ~ 'MethodDecs ~ RBRACE(),
     'VarDecs ::= 'VarDeclaration ~ 'VarDecs | epsilon(),
@@ -114,7 +115,8 @@ object Parser extends Pipeline[Iterator[Token], Program] {
     'DotSeq ::= LENGTH() | 'Identifier ~ LPAREN() ~ 'Args ~ RPAREN() ~ 'BracketSeq,
     
     'NewExpr ::= NEW() ~ 'NewSeq | 'Factor,
-    'NewSeq ::= INT() ~ LBRACKET() ~ 'Expression ~ RBRACKET() | 'Identifier ~ LPAREN() ~ RPAREN(),
+    'NewSeq ::= INT() ~ LBRACKET() ~ 'Expression ~ RBRACKET() | 'Identifier ~ LPAREN() ~ 'NewClassSeq,
+    'NewClassSeq ::= RPAREN() | 'Expression ~ RPAREN(),
     
     'Factor ::= INTLITSENT | STRINGLITSENT | TRUE() | FALSE() | THIS() | 'Identifier | LPAREN() ~ 'Expression ~ RPAREN(),
 
