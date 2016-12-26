@@ -158,11 +158,22 @@ class ASTConstructorLL1 extends ASTConstructor {
         newSeq match {
           case Node('NewSeq ::= List(INT(), _, 'Expression, _), List(_, _, expr, _)) =>
             NewIntArray(constructExpr(expr)).setPos(nt)
-          case Node('NewSeq ::= List('Identifier, _, _), List(id, _, _)) =>
-            New(constructId(id)).setPos(nt)
+          /* Project Extension */
+          case Node('NewSeq ::= List('Identifier, _, 'NewClassSeq), List(id, _, newClassSeq)) =>
+            constructNewClass(nt, id, newClassSeq)
         }
       case Node('NewExpr ::= List('Factor), List(factor)) =>
         constructFactor(factor)
+    }
+  }
+
+  /* Project Extension */
+  def constructNewClass(newToken: Token, id: NodeOrLeaf[Token], ptree: NodeOrLeaf[Token]): ExprTree = {
+    ptree match {
+      case Node('NewClassSeq ::= _, _) =>
+        New(constructId(id)).setPos(newToken)
+      case Node('NewClassSeq ::= List('Expression, _), List(expr, _)) =>
+        NewValueClass(constructId(id), constructExpr(expr)).setPos(newToken)
     }
   }
 

@@ -162,12 +162,22 @@ object Trees {
       }
     }
   }
+
   case class New(tpe: Identifier) extends ExprTree {
     def getType = tpe.getType match {
       case t@TClass(_) => t
       case other => TError
     }
   }
+
+  /* Project Extension */
+  case class NewValueClass(tpe: Identifier, expr: ExprTree) extends ExprTree{
+    def getType = tpe.getType match {
+      case t@TValueClass(_) => t
+      case other => TError
+    }
+  }
+
   // Literals
   case class IntLit(value: Int) extends ExprTree {
     val getType = TInt

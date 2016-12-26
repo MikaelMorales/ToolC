@@ -83,6 +83,16 @@ object Printer {
           "}",
           ""
         )
+      case ValueClassDecl(id, field, methods) =>
+        Stacked(
+          "class " <:> rec(id) <:> " {",
+          Indented(Stacked(
+            List(rec(field)) ++ (Raw("") :: (methods map rec))
+          )),
+          "}",
+          ""
+        )
+
       case VarDecl(tpe, id) =>
         s"var " <:> rec(id) <:> ": " <:> rec(tpe) <:> ";"
       case MethodDecl(id, args, retType, vars, stats, retExpr) =>
@@ -175,6 +185,8 @@ object Printer {
         "(new Int[" <:> rec(size) <:> "])"
       case New(tpe) =>
         "(new " <:> rec(tpe) <:> "())"
+      case NewValueClass(tpe, expr) =>
+        "(new " <:> rec(tpe) <:> "(" <:> rec(expr) <:> "))"
       case Not(expr) =>
         "(!(" <:> rec(expr) <:> "))"
     }
