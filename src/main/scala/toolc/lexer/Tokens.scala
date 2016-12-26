@@ -7,7 +7,7 @@ import utils._
 sealed class Token extends Positioned
 
 object Tokens {
-
+  /* Basic Tokens */
   case class BAD()        extends Token // represents incorrect tokens.
   case class EOF()        extends Token // Signifies end-of-file
   case class COLON()      extends Token // :
@@ -49,6 +49,8 @@ object Tokens {
   case class NEW()        extends Token // new
   case class PRINTLN()    extends Token // println
   case class DO()         extends Token // do(expr)
+  /* Extension of the project */
+  case class VALUE()      extends Token // value
 
   // Identifiers
   case class ID(val value: String) extends Token with TerminalClass

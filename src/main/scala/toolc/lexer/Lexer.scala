@@ -21,7 +21,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
     case "String"   => Some(STRING())
     case "extends"  => Some(EXTENDS())
     case "Int"      => Some(INT())
-    case "Bool"     => Some(BOOLEAN()) // Bool pas BOOLEAN !!!!!!!!!
+    case "Bool"     => Some(BOOLEAN())
     case "while"    => Some(WHILE())
     case "if"       => Some(IF())
     case "else"     => Some(ELSE())
@@ -33,6 +33,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
     case "new"      => Some(NEW())
     case "println"  => Some(PRINTLN())
     case "do"       => Some(DO())
+    case "value"    => Some(VALUE())
     case _          => None
   }
 
@@ -242,7 +243,6 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
     }
   }
 }
-/* /* */ */
 
 /** Reads and displays the tokens, then returns a fresh iterator with the same tokens. */
 object DisplayTokens extends Pipeline[Iterator[Token], Iterator[Token]] {
