@@ -131,7 +131,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
           if(nextChar == '=') {
             consume(2)
             EQUALS()
-          }else{
+          } else {
             consume()
             EQSIGN()
           }
