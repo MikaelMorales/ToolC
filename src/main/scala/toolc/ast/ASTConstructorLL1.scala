@@ -8,6 +8,33 @@ import grammarcomp.parsing._
 
 class ASTConstructorLL1 extends ASTConstructor {
 
+  /* Project extension */
+  override def constructClass(ptree: NodeOrLeaf[Token]): Class = {
+    ptree match {
+      case Node(
+      'ClassDeclaration ::=  _,
+      List(Leaf(cls), id, optextends, Node('ClassBody ::= _, List(_, vardecls, methoddecls, _)))
+      ) =>
+        ClassDecl(
+          constructId(id),
+          constructOption(optextends, constructId),
+          constructList(vardecls, constructVarDecl),
+          constructList(methoddecls, constructMethodDecl)
+        ).setPos(cls)
+
+      /* Project Extension */
+      case Node(
+      'ClassDeclaration ::= List(VALUE(), CLASS(), 'Identifier, 'ClassBody),
+      List(Leaf(value), _, id, Node('ClassBody ::= _, List(_, fielddecl, methoddecls, _)))
+      ) =>
+        ValueClassDecl(
+          constructId(id),
+          constructVarDecl(fielddecl),
+          constructList(methoddecls, constructMethodDecl)
+        ).setPos(value)
+    }
+  }
+
   //Override the construction of the three for Type
   override def constructType(ptree: NodeOrLeaf[Token]): TypeTree = {
     ptree match {

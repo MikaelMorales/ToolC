@@ -70,6 +70,19 @@ object Symbols {
     }
   }
 
+  class ValueClassSymbol(val name: String, val fieldId: String) extends Symbol {
+    override def getType = TValueClass(this)
+    override def setType(t: Type) = sys.error("Cannot set the symbol of a ValueClassSymbol")
+
+    var methods = Map[String,MethodSymbol]()
+    var members = Map[String,VariableSymbol]() // Contain the field and local variables
+    val field: Option[VariableSymbol] = members.get(fieldId)
+
+    def lookupMethod(n: String): Option[MethodSymbol] = methods.get(n)
+
+    def lookupVar(n: String): Option[VariableSymbol] = members.get(n)
+  }
+
   class MethodSymbol(val name: String, val classSymbol: ClassSymbol) extends Symbol {
     var params = Map[String,VariableSymbol]()
     var members = Map[String,VariableSymbol]()

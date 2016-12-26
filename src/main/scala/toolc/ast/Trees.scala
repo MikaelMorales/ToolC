@@ -27,14 +27,29 @@ object Trees {
     override def toString = value
   }
 
+
   // Definitions
   sealed trait DefTree extends Tree
+  /* Project extension */
+  sealed trait Class extends DefTree{
+    val id: Identifier
+    val methods: List[MethodDecl]
+    val parent: Option[Identifier]
+    val vars: List[VarDecl]
+  }
   case class Program(main: MainObject, classes: List[ClassDecl])
     extends DefTree
   case class MainObject(id: Identifier, stats: List[StatTree])
     extends DefTree with Symbolic[MainSymbol]
   case class ClassDecl(id: Identifier, parent: Option[Identifier], vars: List[VarDecl], methods: List[MethodDecl])
-    extends DefTree with Symbolic[ClassSymbol]
+    extends Class with Symbolic[ClassSymbol]
+  /* Project extension */
+  case class ValueClassDecl(id: Identifier, field: VarDecl, methods: List[MethodDecl])
+    extends Class with Symbolic[ValueClassSymbol] {
+    override val parent = None
+    override val vars = List(field)
+  }
+
   case class VarDecl(tpe: TypeTree, id: Identifier)
     extends DefTree with Symbolic[VariableSymbol]
   case class MethodDecl(id: Identifier,
