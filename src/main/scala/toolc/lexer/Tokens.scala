@@ -52,9 +52,6 @@ object Tokens {
   /* Extension of the project */
   case class VALUE()      extends Token // value
 
-  //Extension for the project
-  case class VALUE()      extends Token // value
-
   // Identifiers
   case class ID(val value: String) extends Token with TerminalClass
 

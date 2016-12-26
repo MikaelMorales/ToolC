@@ -49,7 +49,7 @@ object Parser extends Pipeline[Iterator[Token], Program] {
       | TRUE() | FALSE() | 'Identifier | THIS()
       | NEW() ~ INT() ~ LBRACKET() ~ 'Expression ~ RBRACKET()
       | NEW() ~ 'Identifier ~ LPAREN() ~ RPAREN()
-      | NEW() ~ 'Identifier ~ LPAREN() ~ 'Expression ~ RPAREN()
+      | NEW() ~ 'Identifier ~ LPAREN() ~ 'Expression ~ RPAREN()
       | BANG() ~ 'Expression
       | LPAREN() ~ 'Expression ~ RPAREN(),
     'Args ::= epsilon() | 'Expression ~ 'ExprList,
