@@ -1,0 +1,12 @@
+/target
+/project/target
+/project/project
+/bin/
+**/.DS_Store
+.idea/
+.classpath
+.cache-main
+.settings/
+*.class
+.project
+src/main/scala/toolc/target
