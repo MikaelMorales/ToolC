@@ -38,7 +38,6 @@
 //      val mh: MethodHandler = cf.addMethod(typeToDescr(decl.retType.getType),
 //                                            method.name,
 //                                            method.argList.map(a => typeToDescr(a.getType)))
-//      mh.setFlags(Flags.METHOD_ACC_STATIC)
 //      cGenMethod(mh.codeHandler, decl)
 //    }
 //

@@ -85,7 +85,7 @@ object Printer {
         )
       case ValueClassDecl(id, vars, methods) =>
         Stacked(
-          "class " <:> rec(id) <:> " {",
+          "cvalue class " <:> rec(id) <:> " {",
           Indented(Stacked(
             (vars map rec) ++ (Raw("") :: (methods map rec))
           )),
