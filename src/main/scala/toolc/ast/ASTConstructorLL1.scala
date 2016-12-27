@@ -20,6 +20,7 @@ class ASTConstructorLL1 extends ASTConstructor {
       case Node('Type ::= List('Identifier), List(id)) =>
         val pid = constructId(id)
         ClassType(pid).setPos(pid)
+        
     }
   }
 
@@ -143,7 +144,7 @@ class ASTConstructorLL1 extends ASTConstructor {
   /* Project Extension */
   def constructNewClass(newToken: Token, id: NodeOrLeaf[Token], ptree: NodeOrLeaf[Token]): ExprTree = {
     ptree match {
-      case Node('NewClassSeq ::= _, _) =>
+      case Node('NewClassSeq ::= List(RPAREN()), _) =>
         New(constructId(id)).setPos(newToken)
       case Node('NewClassSeq ::= List('Expression, _), List(expr, _)) =>
         NewValueClass(constructId(id), constructExpr(expr)).setPos(newToken)

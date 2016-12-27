@@ -46,44 +46,49 @@ object Symbols {
   /** The global scope contains symbols of the main object and classes */
   class GlobalScope {
     var mainClass: MainSymbol = _
-    var classes = Map[String,ClassSymbol]()
+    var classes = Map[String,AbstractClassSymbol]()
 
-    def lookupClass(n: String): Option[ClassSymbol] = classes.get(n)
+    def lookupClass(n: String): Option[AbstractClassSymbol] = classes.get(n)
   }
 
   class MainSymbol(val name: String) extends Symbol
 
-  class ClassSymbol(val name: String) extends Symbol {
+  /* Project extension */
+  sealed trait AbstractClassSymbol extends Symbol {
+    var methods = Map[String, MethodSymbol]()
+    var members = Map[String, VariableSymbol]()
+    var parent: Option[ClassSymbol] = None
+
+    def lookupMethod(n: String): Option[MethodSymbol]
+
+    def lookupVar(n: String): Option[VariableSymbol]
+  }
+
+  class ClassSymbol(val name: String) extends AbstractClassSymbol {
     override def getType = TClass(this)
     override def setType(t: Type) = sys.error("Cannot set the symbol of a ClassSymbol")
 
-    var parent: Option[ClassSymbol] = None
-    var methods = Map[String,MethodSymbol]()
-    var members = Map[String,VariableSymbol]()
-
-    def lookupMethod(n: String): Option[MethodSymbol] = {
+    override def lookupMethod(n: String): Option[MethodSymbol] = {
       methods.get(n) orElse parent.flatMap(_.lookupMethod(n))
     }
 
-    def lookupVar(n: String): Option[VariableSymbol] = {
+    override def lookupVar(n: String): Option[VariableSymbol] = {
       members.get(n) orElse parent.flatMap(_.lookupVar(n))
     }
   }
 
-  class ValueClassSymbol(val name: String, val fieldId: String) extends Symbol {
+  class ValueClassSymbol(val name: String, val fieldId: String) extends AbstractClassSymbol {
     override def getType = TValueClass(this)
     override def setType(t: Type) = sys.error("Cannot set the symbol of a ValueClassSymbol")
 
-    var methods = Map[String,MethodSymbol]()
-    var members = Map[String,VariableSymbol]() // Contain the field and local variables
     val field: Option[VariableSymbol] = members.get(fieldId)
 
-    def lookupMethod(n: String): Option[MethodSymbol] = methods.get(n)
+    override def lookupMethod(n: String): Option[MethodSymbol] = methods.get(n)
 
-    def lookupVar(n: String): Option[VariableSymbol] = members.get(n)
+    override def lookupVar(n: String): Option[VariableSymbol] = members.get(n)
   }
 
-  class MethodSymbol(val name: String, val classSymbol: ClassSymbol) extends Symbol {
+  class MethodSymbol(val name: String, val classSymbol: AbstractClassSymbol) extends Symbol {
     var params = Map[String,VariableSymbol]()
     var members = Map[String,VariableSymbol]()
     var argList: List[VariableSymbol] = Nil
