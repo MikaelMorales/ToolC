@@ -35,23 +35,26 @@ object Trees {
   // Definitions
   sealed trait DefTree extends Tree
   /* Project extension */
-  sealed trait Class extends DefTree{
+  sealed trait Class extends DefTree with Symbolic[AbstractClassSymbol] {
     val id: Identifier
     val methods: List[MethodDecl]
     val parent: Option[Identifier]
     val vars: List[VarDecl]
   }
-  case class Program(main: MainObject, classes: List[Class])
-    extends DefTree
-  case class MainObject(id: Identifier, stats: List[StatTree])
-    extends DefTree with Symbolic[MainSymbol]
+
   case class ClassDecl(id: Identifier, parent: Option[Identifier], vars: List[VarDecl], methods: List[MethodDecl])
-    extends Class with Symbolic[ClassSymbol]
+    extends Class
+
   /* Project extension */
   case class ValueClassDecl(id: Identifier, vars: List[VarDecl], methods: List[MethodDecl])
-    extends Class with Symbolic[ValueClassSymbol] {
+    extends Class {
     override val parent = None
   }
+
+  case class Program(main: MainObject, classes: List[Class])
+  extends DefTree
+  case class MainObject(id: Identifier, stats: List[StatTree])
+  extends DefTree with Symbolic[MainSymbol]
 
   case class VarDecl(tpe: TypeTree, id: Identifier)
     extends DefTree with Symbolic[VariableSymbol]
@@ -143,8 +146,8 @@ object Trees {
     val getType = TIntArray
   }
   // Object-oriented expressions
-  case class This() extends ExprTree with Symbolic[ClassSymbol] {
-    def getType = getSymbol.getType //TClass(getSymbol)
+  case class This() extends ExprTree with Symbolic[AbstractClassSymbol] {
+    def getType = getSymbol.getType
   }
   case class MethodCall(obj: ExprTree, meth: Identifier, args: List[ExprTree]) extends ExprTree {
     def getType = {
