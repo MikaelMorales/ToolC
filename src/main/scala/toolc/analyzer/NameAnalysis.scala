@@ -34,7 +34,7 @@ object NameAnalysis extends Pipeline[Program, Program] {
         val newClass = c match {
           case cd: ClassDecl => new ClassSymbol(cd.id.value).setPos(cd.file, cd.line)
           case vcd: ValueClassDecl =>
-            if(vcd.vars.size != 1) ctx.reporter.error("Value class has exactly one field")
+            if(vcd.vars.size != 1) fatal("Value class has exactly one field")
             new ValueClassSymbol(vcd.id.value, vcd.vars.head.id.value).setPos(vcd.file, vcd.line)
         }
 
