@@ -150,31 +150,26 @@ object Trees {
     def getType = getSymbol.getType
   }
   case class MethodCall(obj: ExprTree, meth: Identifier, args: List[ExprTree]) extends ExprTree {
-    override def getType = {
+    def getType = {
       obj.getType match {
-        case TClass(cs) =>
+        case TClass(cs) => getTypeHelper(cs)
+        case TValueClass(vcs) => getTypeHelper(vcs)
+        case _ => TError
       }
     }
-//    def getType = {
-//      obj.getType match {
-//        case TClass(cs) => getTypeHelper(cs)
-//        case TValueClass(vcs) => getTypeHelper(vcs)
-//        case _ => TError
-//      }
-//    }
-//
-//    def getTypeHelper(acs: AbstractClassSymbol) = {
-//      acs.lookupMethod(meth.value) match {
-//        case Some(ms) =>
-//          if (args.size != ms.argList.size) TError
-//          else {
-//            val listTupleArgs = args.map(arg => arg.getType).zip(ms.argList.map(x => x.getType))
-//            val matchArgs = listTupleArgs.forall(tpe => tpe._1.isSubTypeOf(tpe._2))
-//            if (matchArgs) ms.getType else TError
-//          }
-//        case None => TError
-//      }
-//    }
+
+    def getTypeHelper(acs: AbstractClassSymbol) = {
+      acs.lookupMethod(meth.value) match {
+        case Some(ms) =>
+          if (args.size != ms.argList.size) TError
+          else {
+            val listTupleArgs = args.map(arg => arg.getType).zip(ms.argList.map(x => x.getType))
+            val matchArgs = listTupleArgs.forall(tpe => tpe._1.isSubTypeOf(tpe._2))
+            if (matchArgs) ms.getType else TError
+          }
+        case None => TError
+      }
+    }
   }
 
   case class New(tpe: Identifier) extends ExprTree {
