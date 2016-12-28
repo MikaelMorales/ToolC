@@ -89,12 +89,13 @@ object TypeChecking extends Pipeline[Program, Program] {
               }
             case _ => ctx.reporter.error("A method is call with a non class object")
           }
+          tcExpr(obj, obj.getType)
 
           /* Project extension */
         case NewValueClass(tpe, expr: ExprTree) =>
           tpe.getType match {
             case TValueClass(vcs) =>
-              vcs.field match {
+              vcs.getField match {
                 case Some(f) => tcExpr(expr, f.getType)
                 case None => ctx.reporter.error(s"${tpe.value} must have a field")
               }
