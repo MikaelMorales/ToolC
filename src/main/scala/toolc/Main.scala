@@ -41,13 +41,11 @@ object Main {
 
     val pipeline = Lexer andThen
                    Parser andThen
-                   NameAnalysis
-    // andThen
-//                   TypeChecking andThen
-//                   CodeGeneration
+                   NameAnalysis andThen
+                   TypeChecking
+//                 CodeGeneration
 
     val ast = pipeline.run(ctx)(ctx.files.head)
-
     ctx.reporter.terminateIfErrors
 
     println(Printer(ast, true))

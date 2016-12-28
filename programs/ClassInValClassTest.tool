@@ -7,7 +7,7 @@ class A {
 	var x: Int;
 	var y: Int;
 
-	def init(a: Int, b: Int): Int = {
+	def init(a: Int, b: Int): A = {
 		x = a;
 		y = b;
 		return this;

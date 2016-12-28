@@ -81,7 +81,7 @@ object Symbols {
     override def getType = TValueClass(this)
     override def setType(t: Type) = sys.error("Cannot set the symbol of a ValueClassSymbol")
 
-    val field: Option[VariableSymbol] = members.get(fieldId)
+    def getField: Option[VariableSymbol] = members.get(fieldId)
 
     override def lookupMethod(n: String): Option[MethodSymbol] = methods.get(n)
 

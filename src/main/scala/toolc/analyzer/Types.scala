@@ -39,20 +39,29 @@ object Types {
   }
   
   case class TClass(classSymbol: ClassSymbol) extends Type {
-    override def isSubTypeOf(tpe: Type): Boolean =
-      if(tpe == classSymbol.getType || tpe == TObject) true
+    override def isSubTypeOf(tpe: Type): Boolean = {
+      if (tpe == classSymbol.getType || tpe == TObject) true
       else classSymbol.parent match {
         case Some(par) => par.getType.isSubTypeOf(tpe)
         case None => false
       }
+    }
     override def toString = classSymbol.name
   }
 
   case class TValueClass(valueClassSymbol: ValueClassSymbol) extends Type {
+    override def isSubTypeOf(tpe: Type): Boolean =
+      tpe == valueClassSymbol.getType || tpe == TValueObject
+
     override def toString = valueClassSymbol.name
+
   }
 
   // The top of the class hierarchy. Does not correspond to anything in a Tool program,
   // we just use if for convenience during type checking.
   val TObject = TClass(new ClassSymbol("Object"))
+
+  // The top of the value class hierarchy. Does not correspond to anything in a Tool program,
+  // we just use if for convenience during type checking.
+  val TValueObject = TValueClass(new ValueClassSymbol("ValueObject", "any"))
 }
