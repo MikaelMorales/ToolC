@@ -196,12 +196,9 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               }
 
             case None =>
-              id.getType match {
-                case _ =>
-                  ch << ALOAD_0
-                  cGenExpr(expr)
-                  ch << PutField(cname, id.value, typeToDescr(id.getType))
-              }
+              ch << ALOAD_0
+              cGenExpr(expr)
+              ch << PutField(cname, id.value, typeToDescr(id.getType))
           }
 
         case ArrayAssign(id, index, expr) =>
@@ -455,11 +452,8 @@ object CodeGeneration extends Pipeline[Program, Unit] {
                 case _ =>
               }
             case None =>
-              id.getType match {
-                case _ =>
-                  ch << ALOAD_0
-                  ch << GetField(cname, id.value, typeToDescr(id.getType))
-              }
+              ch << ALOAD_0
+              ch << GetField(cname, id.value, typeToDescr(id.getType))
           }
         case _ =>
       }
