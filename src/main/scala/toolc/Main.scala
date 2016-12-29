@@ -39,14 +39,12 @@ object Main {
 
   def main(args: Array[String]) {val ctx = processOptions(args)
 
-    val pipeline = Lexer andThen
-      Parser andThen
-      NameAnalysis andThen
-      TypeChecking andThen
-      CodeGeneration
+    val ctx = processOptions(args)
 
-    pipeline.run(ctx)(ctx.files.head)
+    val program = new Frontend().run(ctx)(ctx.files.head)
 
-    ctx.reporter.terminateIfErrors
+    val evaluator = new Evaluator(ctx, program)
+
+    evaluator.eval()
   }
 }
