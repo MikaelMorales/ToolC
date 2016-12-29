@@ -6,6 +6,7 @@ import toolc.lexer._
 import toolc.utils._
 import toolc.ast._
 import toolc.analyzer._
+import toolc.code._
 
 object Main {
 
@@ -36,18 +37,16 @@ object Main {
   }
 
 
-  def main(args: Array[String]) {
-    val ctx = processOptions(args)
+  def main(args: Array[String]) {val ctx = processOptions(args)
 
     val pipeline = Lexer andThen
-                   Parser andThen
-                   NameAnalysis andThen
-                   TypeChecking
-//                 CodeGeneration
+      Parser andThen
+      NameAnalysis andThen
+      TypeChecking andThen
+      CodeGeneration
 
-    val ast = pipeline.run(ctx)(ctx.files.head)
+    pipeline.run(ctx)(ctx.files.head)
+
     ctx.reporter.terminateIfErrors
-
-    println(Printer(ast, true))
   }
 }
