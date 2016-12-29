@@ -173,12 +173,15 @@ object CodeGeneration extends Pipeline[Program, Unit] {
           ch << Label(afterLabel)
 
         case Println(expr) =>
+          def invokePrintLn(returnType: String) =
+            ch << InvokeVirtual("java/io/PrintStream", "println", "("+ returnType +")V")
+
           ch << GetStatic("java/lang/System", "out", "Ljava/io/PrintStream;")
           cGenExpr(expr)
           expr.getType match {
-            case TString => ch << InvokeVirtual("java/io/PrintStream", "println", "(Ljava/lang/String;)V")
-            case TInt => ch << InvokeVirtual("java/io/PrintStream", "println", "(I)V")
-            case TBoolean => ch << InvokeVirtual("java/io/PrintStream", "println", "(Z)V")
+            case TString => invokePrintLn("Ljava/lang/String;")
+            case TInt => invokePrintLn("I")
+            case TBoolean => invokePrintLn("Z")
             case _ => sys.error(s"Printing wrong type in generation code, match ${expr.getType}");
           }
         case Assign(id, expr) =>
@@ -269,6 +272,14 @@ object CodeGeneration extends Pipeline[Program, Unit] {
           ch << Label(afterLabel)
 
         case Plus(lhs, rhs) =>
+          def invokeStringBuilderAppend(returnType: String) =
+            ch << InvokeVirtual("java/lang/StringBuilder", "append", "("+returnType+")Ljava/lang/StringBuilder;")
+
+          def invokeStringBuilderToString =
+            ch << InvokeVirtual("java/lang/StringBuilder", "toString", "()Ljava/lang/String;")
+
+
+
           (lhs.getType,rhs.getType) match {
             case (TInt, TInt) =>
               cGenExpr(lhs)
@@ -278,27 +289,26 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               //Use default constructor to create a string builder
               ch << DefaultNew("java/lang/StringBuilder")
               cGenExpr(lhs)
-              ch << InvokeVirtual("java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;")
+              invokeStringBuilderAppend("I")
               cGenExpr(rhs)
-              ch << InvokeVirtual("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;")
-              ch << InvokeVirtual("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
-
+              invokeStringBuilderAppend("Ljava/lang/String;")
+              invokeStringBuilderToString
             case (TString, TInt) =>
               //Use default constructor to create a string builder
               ch << DefaultNew("java/lang/StringBuilder")
               cGenExpr(lhs)
-              ch << InvokeVirtual("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+              invokeStringBuilderAppend("Ljava/lang/String;")
               cGenExpr(rhs)
-              ch << InvokeVirtual("java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;")
-              ch << InvokeVirtual("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
+              invokeStringBuilderAppend("I")
+              invokeStringBuilderToString
             case (TString, TString) =>
               //Use default constructor to create a string builder
               ch << DefaultNew("java/lang/StringBuilder")
               cGenExpr(lhs)
-              ch << InvokeVirtual("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+              invokeStringBuilderAppend("Ljava/lang/String;")
               cGenExpr(rhs)
-              ch << InvokeVirtual("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;")
-              ch << InvokeVirtual("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
+              invokeStringBuilderAppend("Ljava/lang/String;")
+              invokeStringBuilderToString
 
             case _ => sys.error("Error in code generation while adding !")
           }
@@ -332,23 +342,23 @@ object CodeGeneration extends Pipeline[Program, Unit] {
           val trueCase = ch.getFreshLabel("trueCase")
           val afterLabel = ch.getFreshLabel("afterLabel")
 
+          def compare() = {
+            ch << ICONST_0
+            ch << Goto(afterLabel)
+            ch << Label(trueCase)
+            ch << ICONST_1
+            ch << Label(afterLabel)
+          }
+
           cGenExpr(lhs)
           cGenExpr(rhs)
           (lhs.getType, rhs.getType) match {
             case (TInt, TInt) | (TBoolean, TBoolean) =>
               ch << If_ICmpEq(trueCase)
-              ch << ICONST_0
-              ch << Goto(afterLabel)
-              ch << Label(trueCase)
-              ch << ICONST_1
-              ch << Label(afterLabel)
+              compare()
             case (TString, TString) | (TIntArray, TIntArray) | (TClass(_), TClass(_)) =>
               ch << If_ACmpEq(trueCase)
-              ch << ICONST_0
-              ch << Goto(afterLabel)
-              ch << Label(trueCase)
-              ch << ICONST_1
-              ch << Label(afterLabel)
+              compare()
             case (TValueClass(va), TValueClass(vb)) =>
               if(va.name != vb.name) {
                 ch << POP << POP
@@ -359,11 +369,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
                   case TString | TIntArray | TClass(_) => ch << If_ACmpEq(trueCase)
                   case _ => sys.error("Matching an unexpected type field on equals")
                 }
-                ch << ICONST_0
-                ch << Goto(afterLabel)
-                ch << Label(trueCase)
-                ch << ICONST_1
-                ch << Label(afterLabel)
+                compare()
               }
             case _ => sys.error("Error on equals in code generation")
           }
