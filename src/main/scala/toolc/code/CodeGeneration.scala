@@ -51,7 +51,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
        */
       val mh = method.classSymbol match {
         case vcs: ValueClassSymbol =>
-          val tmp = buildMethodHandler(method.argList.map(a => typeToDescr(a.getType)) :+ typeToDescr(vcs.getField.get.getType))
+          val tmp = buildMethodHandler(typeToDescr(vcs.getField.get.getType) :: method.argList.map(a => typeToDescr(a.getType)))
           tmp.setFlags(Flags.METHOD_ACC_STATIC)
           tmp
         case _ => buildMethodHandler(method.argList.map(a => typeToDescr(a.getType)))
@@ -96,7 +96,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       val argMappings = methSym.classSymbol match {
         case vcs: ValueClassSymbol =>
           (mt.args.zipWithIndex.map { case (arg, index) =>
-            arg.id.getSymbol.name -> (index + 1)} :+ (vcs.getField.get.name -> (mt.args.size+1) )).toMap
+            arg.id.getSymbol.name -> (index+1)} :+ (vcs.getField.get.name -> (0) )).toMap
         case _ =>
           mt.args.zipWithIndex.map { case (arg, index) =>
           arg.id.getSymbol.name -> (index + 1)}.toMap
@@ -390,8 +390,8 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               //Create return type string of the method
               val returnString = new StringBuilder
               returnString.append("(")
-              args.foreach(a => returnString.append(typeToDescr(a.getType)))
               returnString.append(typeToDescr(vcs.getField.get.getType)) // Ajoute le type du field en dernier argument
+              args.foreach(a => returnString.append(typeToDescr(a.getType)))
               returnString.append(")")
               returnString.append(typeToDescr(x.getType))
 
@@ -405,7 +405,6 @@ object CodeGeneration extends Pipeline[Program, Unit] {
 
         case NewValueClass(tpe, e) =>
           cGenExpr(e)
-          ch << IStore(0) //TODO
 
         case New(tpe) =>
           ch << DefaultNew(tpe.value)
