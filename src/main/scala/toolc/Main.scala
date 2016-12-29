@@ -2,11 +2,11 @@ package toolc
 
 import java.io.File
 
+import toolc.analyzer._
+import toolc.ast._
+import toolc.eval._
 import toolc.lexer._
 import toolc.utils._
-import toolc.ast._
-import toolc.analyzer._
-import toolc.code._
 
 object Main {
 
@@ -37,11 +37,15 @@ object Main {
   }
 
 
-  def main(args: Array[String]) {val ctx = processOptions(args)
-
+  def main(args: Array[String]) {
     val ctx = processOptions(args)
 
-    val program = new Frontend().run(ctx)(ctx.files.head)
+    val pipeline = Lexer andThen
+      Parser andThen
+      NameAnalysis andThen
+      TypeChecking
+
+    val program = pipeline.run(ctx)(ctx.files.head)
 
     val evaluator = new Evaluator(ctx, program)
 
