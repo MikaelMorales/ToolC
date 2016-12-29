@@ -105,7 +105,7 @@ object NameAnalysis extends Pipeline[Program, Program] {
               //Define the methods of the class
               for (function <- c.methods) collectMethods(cl, function)
               //Define the variables of the class
-              for (variable <- c.vars) checkFieldDuplication(cl, variable)
+              for (variable <- c.vars) collectFields(cl, variable)
           }
         }
       }
@@ -148,7 +148,7 @@ object NameAnalysis extends Pipeline[Program, Program] {
       /**
         * Collect and set symbols for variables inside the class and check that there is no duplication or overload.
         */
-      def checkFieldDuplication(myClass: Symbols.AbstractClassSymbol, variable: Trees.VarDecl): Unit = {
+      def collectFields(myClass: Symbols.AbstractClassSymbol, variable: Trees.VarDecl): Unit = {
         val newVar = new VariableSymbol(variable.id.value)
 
         //Look if the parent already have this field
@@ -321,6 +321,16 @@ object NameAnalysis extends Pipeline[Program, Program] {
         case Assign(id: Identifier, expr: ExprTree) =>
           setISymbol(id)
           setESymbols(expr)
+          ms match {
+            case Some(methodSymbol) =>
+              methodSymbol.classSymbol match {
+                case vcs: ValueClassSymbol if id.getSymbol.id == vcs.getField.get.id =>
+                  ctx.reporter.error(s"Cannot reassign the field of value class, in ${vcs.name}")
+                case _ =>
+              }
+            case _ =>
+          }
+
         case ArrayAssign(id: Identifier, index: ExprTree, expr: ExprTree) =>
           setISymbol(id)
           setESymbols(index)

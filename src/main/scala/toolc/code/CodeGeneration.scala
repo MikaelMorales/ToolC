@@ -96,7 +96,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       val argMappings = methSym.classSymbol match {
         case vcs: ValueClassSymbol =>
           (mt.args.zipWithIndex.map { case (arg, index) =>
-            arg.id.getSymbol.name -> (index+1)} :+ (vcs.getField.get.name -> (0) )).toMap
+            arg.id.getSymbol.name -> (index+1)} :+ (vcs.getField.get.name -> 0 )).toMap
         case _ =>
           mt.args.zipWithIndex.map { case (arg, index) =>
           arg.id.getSymbol.name -> (index + 1)}.toMap
@@ -113,7 +113,11 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       cGenExpr(mt.retExpr)(ch, mapping, methSym.classSymbol.name)
       // Return with the correct opcode, based on the type of the return expression
       mt.retExpr.getType match {
-        case TInt | TBoolean=> ch << IRETURN
+        case TInt | TBoolean => ch << IRETURN
+        case TValueClass(vcs) => findValueClassType(vcs.getField.get.getType) match {
+          case TInt | TBoolean => ch << IRETURN
+          case _ => ch << ARETURN
+        }
         case _ => ch << ARETURN
       }
 
@@ -151,7 +155,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
             ch << Label(elseLabel)
             cGenStat(els.get)
             ch << Label(afterLabel)
-          }else{
+          } else {
             ch << IfEq(afterLabel)
             cGenStat(thn)
             ch << Label(afterLabel)
@@ -190,7 +194,6 @@ object CodeGeneration extends Pipeline[Program, Unit] {
 
             case None =>
               id.getType match {
-                case TValueClass(_) => sys.error("Value class field not found !")
                 case _ =>
                   ch << ALOAD_0
                   cGenExpr(expr)
@@ -346,8 +349,22 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               ch << Label(trueCase)
               ch << ICONST_1
               ch << Label(afterLabel)
-            case (TValueClass(_), TValueClass(_)) =>
-              //TODO
+            case (TValueClass(va), TValueClass(vb)) =>
+              if(va.name != vb.name) {
+                ch << POP << POP
+                ch << ICONST_0
+              } else {
+                findValueClassType(va.getField.get.getType) match {
+                  case TInt | TBoolean => ch << If_ICmpEq(trueCase)
+                  case TString | TIntArray | TClass(_) => ch << If_ACmpEq(trueCase)
+                  case _ => sys.error("Matching an unexpected type field on equals")
+                }
+                ch << ICONST_0
+                ch << Goto(afterLabel)
+                ch << Label(trueCase)
+                ch << ICONST_1
+                ch << Label(afterLabel)
+              }
             case _ => sys.error("Error on equals in code generation")
           }
         case ArrayRead(arr, index) =>
@@ -366,10 +383,11 @@ object CodeGeneration extends Pipeline[Program, Unit] {
             case TClass(_) => ch << ALOAD_0
             case TValueClass(vcs) =>
               findValueClassType(vcs.getField.get.getType) match {
-                case TInt | TBoolean => ILoad(mapping.get(vcs.getField.get.name).get)
-                case TIntArray | TString | TClass(_) => ch << ALoad(mapping.get(vcs.getField.get.name).get)
+                case TInt | TBoolean => ch << ILoad(mapping(vcs.getField.get.name))
+                case TIntArray | TString | TClass(_) => ch << ALoad(mapping(vcs.getField.get.name))
                 case _ => sys.error("Cannot find this type")
               }
+            case _ => sys.error("Type of this has to be a class or a value class")
           }
 
         case x@MethodCall(obj, meth, args) =>
@@ -396,14 +414,14 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               returnString.append(typeToDescr(x.getType))
 
               //Start pushing on stack
-              args foreach cGenExpr
               cGenExpr(obj)
+              args foreach cGenExpr
               ch << InvokeStatic(vcs.name, meth.value, returnString.toString())
 
             case _ => sys.error("Error on method symbol in code generation")
           }
 
-        case NewValueClass(tpe, e) =>
+        case NewValueClass(_, e) =>
           cGenExpr(e)
 
         case New(tpe) =>
@@ -432,7 +450,6 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               }
             case None =>
               id.getType match {
-                case TValueClass(_) => sys.error("Value class field not found !")
                 case _ =>
                   ch << ALOAD_0
                   ch << GetField(cname, id.value, typeToDescr(id.getType))
