@@ -160,6 +160,7 @@ class Evaluator(ctx: Context, prog: Program) {
           case (cs1: ValueClassSymbol, cs2: ValueClassSymbol) => valueClassEquals(obj1, cs1, obj2, cs2)
           case _ => fatal(s"Value class ${vcs1.name} or ${vcs2.name} doesn't have a value class symbol")
         }
+      case _ => fatal("Unexpected comparison of two different types with equals")
     }
   }
 
@@ -223,13 +224,8 @@ class Evaluator(ctx: Context, prog: Program) {
   case class ObjectValue(cd: Class) extends Value {
     var fields = Map[String, Option[Value]]()
 
-    def setField(name: String, v: Value) {
-      cd match {
-        case _: ClassDecl =>
-          if (fields contains name) fields += name -> Some(v) else fatal(s"Unknown field '$name'")
-        case _: ValueClassDecl =>
-          fatal(s"Cannot reassign a value class field")
-      }
+    def setField(name: String, v: Value) = {
+      if (fields contains name) fields += name -> Some(v) else fatal(s"Unknown field '$name'")
     }
 
     def getField(name: String) = {
