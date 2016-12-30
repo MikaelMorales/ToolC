@@ -76,9 +76,9 @@ class Evaluator(ctx: Context, prog: Program) {
       (l, r) match {
         case (IntValue(i1), IntValue(i2)) => BoolValue(i1 == i2)
         case (BoolValue(i1), BoolValue(i2)) => BoolValue(i1 == i2)
-        case (_: StringValue, _: StringValue) => BoolValue(l == r)
-        case (_: ArrayValue, _: ArrayValue) => BoolValue(l eq r)
-        case (ObjectValue(_: ClassDecl), ObjectValue(_: ClassDecl)) => BoolValue(l eq r)
+        case (StringValue(s1), StringValue(s2)) => BoolValue(s1 eq s2)
+        case (ArrayValue(a1), ArrayValue(a2)) => BoolValue(a1 eq a2)
+        case (ObjectValue(c1: ClassDecl), ObjectValue(c2: ClassDecl)) => BoolValue(c1 eq c2)
         case (o1@ObjectValue(vcl1: ValueClassDecl), o2@ObjectValue(vcl2: ValueClassDecl)) =>
           (vcl1.getSymbol, vcl2.getSymbol) match {
             case (cs1: ValueClassSymbol, cs2: ValueClassSymbol) => valueClassEquals(o1, cs1, o2, cs2)
@@ -157,9 +157,9 @@ class Evaluator(ctx: Context, prog: Program) {
     (objVal1.getField(vcs1.fieldId), objVal2.getField(vcs2.fieldId)) match {
       case (IntValue(i1), IntValue(i2)) => BoolValue((vcs1.name == vcs2.name) && i1 == i2)
       case (BoolValue(b1), BoolValue(b2)) => BoolValue((vcs1.name == vcs2.name) && b1 == b2)
-      case (StringValue(s1), StringValue(s2)) => BoolValue((vcs1.name == vcs2.name) && (s1 == s2))
+      case (StringValue(s1), StringValue(s2)) => BoolValue((vcs1.name == vcs2.name) && (s1 eq s2))
       case (ArrayValue(a1), ArrayValue(a2)) => BoolValue((vcs1.name == vcs2.name) && (a1 eq a2))
-      case (obj1@ObjectValue(_: ClassDecl), obj2@ObjectValue(_: ClassDecl)) => BoolValue((vcs1.name == vcs2.name) && (obj1 eq obj2))
+      case (ObjectValue(c1: ClassDecl), ObjectValue(c2: ClassDecl)) => BoolValue((vcs1.name == vcs2.name) && (c1 eq c2))
       case (obj1@ObjectValue(vcl1: ValueClassDecl), obj2@ObjectValue(vcl2: ValueClassDecl)) =>
         (vcl1.getSymbol, vcl2.getSymbol) match {
           case (cs1: ValueClassSymbol, cs2: ValueClassSymbol) => valueClassEquals(obj1, cs1, obj2, cs2)

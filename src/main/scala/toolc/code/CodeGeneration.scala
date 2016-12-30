@@ -114,13 +114,9 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       // Generate code for the return expression
       cGenExpr(mt.retExpr)(ch, mapping, methSym.classSymbol.name)
       // Return with the correct opcode, based on the type of the return expression
-      mt.retExpr.getType match {
-        case TInt | TBoolean => ch << IRETURN
-        case TValueClass(vcs) => findRootType(vcs.getField.get.getType) match {
+      findRootType(mt.retExpr.getType) match {
           case TInt | TBoolean => ch << IRETURN
           case _ => ch << ARETURN
-        }
-        case _ => ch << ARETURN
       }
 
       ch.freeze
@@ -398,15 +394,10 @@ object CodeGeneration extends Pipeline[Program, Unit] {
           value class we recursively load the root field.
          */
         case t@This() =>
-          t.getType match {
-            case TClass(_) => ch << ALOAD_0
-            case TValueClass(vcs) =>
-              findRootType(vcs.getField.get.getType) match {
-                case TInt | TBoolean => ch << ILoad(mapping(vcs.getField.get.name))
-                case TIntArray | TString | TClass(_) => ch << ALoad(mapping(vcs.getField.get.name))
-                case _ => sys.error("Cannot find this type")
-              }
-            case _ => sys.error("Type of this has to be a class or a value class")
+          findRootType(t.getType) match {
+            case TInt | TBoolean => ch << ILOAD_0
+            case TIntArray | TString | TClass(_) => ch << ALOAD_0
+            case _ => sys.error("Unexpected type for this")
           }
 
         case x@MethodCall(obj, meth, args) =>
@@ -458,24 +449,19 @@ object CodeGeneration extends Pipeline[Program, Unit] {
         case Variable(id) =>
           mapping.get(id.value) match {
             case Some(pos) =>
-              id.getType match {
+              findRootType(id.getType) match { // find the root type if it's a value class
                 case TInt | TBoolean => ch << ILoad(pos)
                 case TIntArray | TString | TClass(_) => ch << ALoad(pos)
-                case TValueClass(vcs) => // Load the root field of the value class.
-                  findRootType(vcs.getField.get.getType) match {
-                    case TInt | TBoolean => ch << ILoad(pos)
-                    case TIntArray | TString | TClass(_) => ch << ALoad(pos)
-                    case _ =>
-                  }
                 case _ =>
               }
+
             case None =>
               ch << ALOAD_0
               ch << GetField(cname, id.value, typeToDescr(id.getType))
           }
+
         case _ =>
       }
-
     }
 
     // Transforms a Tool type to the corresponding JVM type description
@@ -489,7 +475,12 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       case _ => sys.error("Error on type matching in code generation")
     }
 
-
+    /**
+      * Compute the type of the root field if it's a value class,
+      * otherwise return the type.
+      * @param tpe The type of the current field
+      * @return The type of the root field
+      */
     def findRootType(tpe: Type): Type = {
       tpe match {
         case TValueClass(vcs) => findRootType(vcs.getField.get.getType)
