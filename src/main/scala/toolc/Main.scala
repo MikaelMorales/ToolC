@@ -4,7 +4,7 @@ import java.io.File
 
 import toolc.analyzer._
 import toolc.ast._
-import toolc.eval._
+import toolc.code._
 import toolc.lexer._
 import toolc.utils._
 
@@ -43,12 +43,11 @@ object Main {
     val pipeline = Lexer andThen
       Parser andThen
       NameAnalysis andThen
-      TypeChecking
+      TypeChecking andThen
+      CodeGeneration
 
-    val program = pipeline.run(ctx)(ctx.files.head)
+    pipeline.run(ctx)(ctx.files.head)
 
-    val evaluator = new Evaluator(ctx, program)
-
-    evaluator.eval()
+    ctx.reporter.terminateIfErrors
   }
 }
