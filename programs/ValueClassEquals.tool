@@ -10,6 +10,16 @@ program ValueClassTest {
     println("**********************");
     println("Result should be false :");
     println(new C(new A(3)) == new B(3));
+    println("**********************");
+    println("Result should be false :");
+    println(new D("hi") == new D("ho"));
+    println("**********************");
+    println("Result should be true :");
+    println(new D("hi") == new D("hi"));
+    println("**********************");
+    println("Result should be false :");
+    println(new E(new Int[2]) == new E(new Int[2]));
+
 }
 
 cvalue class A {
@@ -22,4 +32,12 @@ cvalue class B {
 
 cvalue class C {
     var x: A;
+}
+
+cvalue class D {
+    var x: String;
+}
+
+cvalue class E {
+    var x: Int[];
 }
