@@ -1,4 +1,5 @@
 program AssignTest {
+    println("Expected: 7");
     println(new Test(5).reassign(7));
 }
 

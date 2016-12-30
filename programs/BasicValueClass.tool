@@ -1,5 +1,5 @@
 program ValueClassTest {
-    println(new Test(2).sayHello());
+    println(new Test(2).sayHello()); //Expected Hello2
 }
 
 cvalue class Test {

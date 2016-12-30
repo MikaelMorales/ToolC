@@ -1,5 +1,8 @@
 program BigValClassTest {
+    println("Expected: hi! 5 I'm always true My Field is world 3")
 	println(new A(new B(5)).foo().compute() + new C(true).getThis().hi() + new D("world").getThis().getThis().hi() + new E(new Int[5+3]).setItem(2, 3).getItem(2));
+    println("***************");
+    println("hi! 5 I'm always true My Field is world 3" == new A(new B(5)).foo().compute() + new C(true).getThis().hi() + new D("world").getThis().getThis().hi() + new E(new Int[5+3]).setItem(2, 3).getItem(2));
 }
 
 cvalue class A {
