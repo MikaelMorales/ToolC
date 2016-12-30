@@ -16,6 +16,9 @@ program ValueClassTest {
     println("**********************");
     println("Result should be true :");
     println(new D("hi") == new D("hi"));
+    println("**********************"); //Reference comparison
+    println("Result should be false :");
+    println(new D("hi2") == new D("hi" + 2));
     println("**********************");
     println("Result should be false :");
     println(new E(new Int[2]) == new E(new Int[2]));
