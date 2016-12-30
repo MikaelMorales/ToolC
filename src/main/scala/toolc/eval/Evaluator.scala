@@ -2,7 +2,10 @@ package toolc
 package eval
 
 import ast.Trees._
+import toolc.analyzer.Symbols.ValueClassSymbol
 import utils._
+
+import scala.annotation.tailrec
 
 class Evaluator(ctx: Context, prog: Program) {
   import ctx.reporter._
@@ -14,7 +17,7 @@ class Evaluator(ctx: Context, prog: Program) {
 
   def evalStatement(stmt: StatTree)(implicit ectx: EvaluationContext): Unit = stmt match {
     case Block(stats) => stats.foreach(stat => evalStatement(stat))
-    case If(expr, thn, els) => {
+    case If(expr, thn, els) =>
       if(evalExpr(expr).asBool) {
         evalStatement(thn)
       }else{
@@ -23,13 +26,13 @@ class Evaluator(ctx: Context, prog: Program) {
             case None =>
         }
       }
-    }
-    case While(expr, stat) => {
+
+    case While(expr, stat) =>
       while(evalExpr(expr).asBool) {
         evalStatement(stat)
       }
-    }
-    case Println(expr) => {
+
+    case Println(expr) =>
       val exp = evalExpr(expr)
       exp match {
           case IntValue(i1) => println(i1)
@@ -37,7 +40,7 @@ class Evaluator(ctx: Context, prog: Program) {
           case StringValue(s1) => println(s1)
           case _ => fatal(s"This type cannot be printed !")
       }
-    }
+
     case Assign(id, expr) => ectx.setVariable(id.value, evalExpr(expr))
     case ArrayAssign(id, index, expr) =>
       ectx.getVariable(id.value).asArray.setIndex(evalExpr(index).asInt, evalExpr(expr).asInt)
@@ -51,7 +54,7 @@ class Evaluator(ctx: Context, prog: Program) {
     case False() => BoolValue(false)
     case And(lhs, rhs) => BoolValue(evalExpr(lhs).asBool && evalExpr(rhs).asBool)
     case Or(lhs, rhs) => BoolValue(evalExpr(lhs).asBool || evalExpr(rhs).asBool)
-    case Plus(lhs, rhs) => {
+    case Plus(lhs, rhs) =>
       val l = evalExpr(lhs)
       val r = evalExpr(rhs)
       (l, r) match {
@@ -61,31 +64,36 @@ class Evaluator(ctx: Context, prog: Program) {
         case (StringValue(s1), StringValue(s2)) => StringValue(s1 + s2);
         case _ => fatal(s"You cannot add this types together !")
       }
-    }
+
     case Minus(lhs, rhs) => IntValue(evalExpr(lhs).asInt - evalExpr(rhs).asInt)
     case Times(lhs, rhs) => IntValue(evalExpr(lhs).asInt * evalExpr(rhs).asInt)
     case Div(lhs, rhs) => IntValue(evalExpr(lhs).asInt / evalExpr(rhs).asInt)
     case LessThan(lhs, rhs) => BoolValue(evalExpr(lhs).asInt < evalExpr(rhs).asInt)
     case Not(expr) => BoolValue(! evalExpr(expr).asBool)
-    case Equals(lhs, rhs) => {
-      val l = evalExpr(lhs);
-      val r = evalExpr(rhs);
+    case Equals(lhs, rhs) =>
+      val l = evalExpr(lhs)
+      val r = evalExpr(rhs)
       (l, r) match {
         case (IntValue(i1), IntValue(i2)) => BoolValue(i1 == i2)
         case (BoolValue(i1), BoolValue(i2)) => BoolValue(i1 == i2)
         case (_: StringValue, _: StringValue) => BoolValue(l eq r)
         case (_: ArrayValue, _: ArrayValue) => BoolValue(l eq r)
-        case (_: ObjectValue, _: ObjectValue) => BoolValue(l eq r)
+        case (ObjectValue(_: ClassDecl), ObjectValue(_: ClassDecl)) => BoolValue(l eq r)
+        case (o1@ObjectValue(vcl1: ValueClassDecl), o2@ObjectValue(vcl2: ValueClassDecl)) =>
+          (vcl1.getSymbol, vcl2.getSymbol) match {
+            case (cs1: ValueClassSymbol, cs2: ValueClassSymbol) => valueClassEquals(o1, cs1, o2, cs2)
+            case _ => fatal("A value class doesn't have a value class symbol")
+          }
         case _ => fatal(s"Can't compare these two objects")
       }
-    }
-    case ArrayRead(arr, index) => {
+
+    case ArrayRead(arr, index) =>
       val array = evalExpr(arr).asArray
       val i = evalExpr(index).asInt
       IntValue(array.getIndex(i))
-    }
+
     case ArrayLength(arr) => IntValue(evalExpr(arr).asArray.length)
-    case MethodCall(obj, meth, args) => {
+    case MethodCall(obj, meth, args) =>
       val objct = evalExpr(obj).asObject
       val method = findMethod(objct.cd, meth.value)
       val newctx = new MethodContext(objct)
@@ -102,9 +110,9 @@ class Evaluator(ctx: Context, prog: Program) {
       method.stats.foreach(stat => evalStatement(stat)(newctx))
       //Evalue le return
       evalExpr(method.retExpr)(newctx)
-    }
+
     case Variable(Identifier(name)) => ectx.getVariable(name)
-    case New(tpe) => {
+    case New(tpe) =>
       //Trouve la classe
       val cl = findClass(tpe.value)
       //Crée object associé à la classe
@@ -112,15 +120,46 @@ class Evaluator(ctx: Context, prog: Program) {
       //Instancie les attributs de l'objet si il y en a
       fieldsOfClass(cl).foreach(att => objct.declareField(att))
       objct
-    }
-    case This() => ectx match {
+
+    case NewValueClass(tpe, fieldExpr) =>
+      //Trouve la classe
+      val cl = findClass(tpe.value)
+      //Crée object associé à la classe
+      val objct = ObjectValue(cl)
+      //Instancie les attributs de l'objet si il y en a
+      fieldsOfClass(cl).foreach(att => objct.declareField(att))
+      //Set field of the value class
+      objct.setField(cl.vars.head.id.value, evalExpr(fieldExpr))
+      objct
+
+    case This() =>
+      ectx match {
         case ctx: MethodContext => ctx.obj
         case _ =>  fatal(s"Cannot call This outside a MethodContext")
-    }
+      }
 
-    case NewIntArray(size) => {
+    case NewIntArray(size) =>
       val sizeArray = evalExpr(size).asInt
       ArrayValue(new Array[Int](sizeArray))
+  }
+
+  /*
+    This method compare two value class equality by comparing the name of the class and then the value of
+    the unique field of a value class.
+   */
+  @tailrec
+  final def valueClassEquals(objVal1: ObjectValue, vcs1: ValueClassSymbol, objVal2: ObjectValue, vcs2: ValueClassSymbol): BoolValue = {
+    (objVal1.getField(vcs1.fieldId), objVal2.getField(vcs2.fieldId)) match {
+      case (IntValue(i1), IntValue(i2)) => BoolValue((vcs1.name == vcs2.name) && i1 == i2)
+      case (BoolValue(b1), BoolValue(b2)) => BoolValue((vcs1.name == vcs2.name) && b1 == b2)
+      case (StringValue(s1), StringValue(s2)) => BoolValue((vcs1.name == vcs2.name) && (s1 eq s2))
+      case (ArrayValue(a1), ArrayValue(a2)) => BoolValue((vcs1.name == vcs2.name) && (a1 eq a2))
+      case (obj1@ObjectValue(_: ClassDecl), obj2@ObjectValue(_: ClassDecl)) => BoolValue((vcs1.name == vcs2.name) && (obj1 eq obj2))
+      case (obj1@ObjectValue(vcl1: ValueClassDecl), obj2@ObjectValue(vcl2: ValueClassDecl)) =>
+        (vcl1.getSymbol, vcl2.getSymbol) match {
+          case (cs1: ValueClassSymbol, cs2: ValueClassSymbol) => valueClassEquals(obj1, cs1, obj2, cs2)
+          case _ => fatal(s"Value class ${vcs1.name} or ${vcs2.name} doesn't have a value class symbol")
+        }
     }
   }
 
@@ -142,17 +181,11 @@ class Evaluator(ctx: Context, prog: Program) {
       }
     }
 
-    def setVariable(name: String, v: Value) {
-      if (vars contains name) {
-        vars += name -> Some(v)
-      } else {
-        obj.setField(name, v)
-      }
+    def setVariable(name: String, v: Value) = {
+      if (vars contains name) vars += name -> Some(v) else obj.setField(name, v)
     }
 
-    def declareVariable(name: String) {
-      vars += name -> None
-    }
+    def declareVariable(name: String) = vars += name -> None
   }
 
   class MainContext extends EvaluationContext {
@@ -162,17 +195,17 @@ class Evaluator(ctx: Context, prog: Program) {
     def declareVariable(name: String): Unit       = unavailable
   }
 
-  def findMethod(cd: ClassDecl, name: String): MethodDecl = {
+  def findMethod(cd: Class, name: String): MethodDecl = {
     cd.methods.find(_.id.value == name).orElse(
       cd.parent.map(p => findMethod(findClass(p.value), name))
     ).getOrElse(fatal("Unknown method "+cd.id+"."+name))
   }
 
-  def findClass(name: String): ClassDecl = {
+  def findClass(name: String): Class = {
     prog.classes.find(_.id.value == name).getOrElse(fatal("Unknown class '"+name+"'"))
   }
 
-  def fieldsOfClass(cl: ClassDecl): Set[String] = {
+  def fieldsOfClass(cl: Class): Set[String] = {
     cl.vars.map(_.id.value).toSet ++
       cl.parent.map(p => fieldsOfClass(findClass(p.value))).getOrElse(Set())
   }
@@ -187,14 +220,15 @@ class Evaluator(ctx: Context, prog: Program) {
     def asArray: ArrayValue   = expected("Array")
   }
 
-  case class ObjectValue(cd: ClassDecl) extends Value {
+  case class ObjectValue(cd: Class) extends Value {
     var fields = Map[String, Option[Value]]()
 
     def setField(name: String, v: Value) {
-      if (fields contains name) {
-        fields += name -> Some(v)
-      } else {
-        fatal(s"Unknown field '$name'")
+      cd match {
+        case _: ClassDecl =>
+          if (fields contains name) fields += name -> Some(v) else fatal(s"Unknown field '$name'")
+        case _: ValueClassDecl =>
+          fatal(s"Cannot reassign a value class field")
       }
     }
 
@@ -206,9 +240,7 @@ class Evaluator(ctx: Context, prog: Program) {
       }
     }
 
-    def declareField(name: String) {
-      fields += name -> None
-    }
+    def declareField(name: String) = fields += name -> None
 
     override def asObject = this
   }
