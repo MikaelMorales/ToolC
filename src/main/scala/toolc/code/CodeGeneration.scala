@@ -115,8 +115,8 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       cGenExpr(mt.retExpr)(ch, mapping, methSym.classSymbol.name)
       // Return with the correct opcode, based on the type of the return expression
       findRootType(mt.retExpr.getType) match {
-        case TInt | TBoolean => ch << IRETURN
-        case _ => ch << ARETURN
+          case TInt | TBoolean => ch << IRETURN
+          case _ => ch << ARETURN
       }
 
       ch.freeze
