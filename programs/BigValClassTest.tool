@@ -5,7 +5,7 @@ program BigValClassTest {
     println("hi! 5 I'm always true My field is world 3" == new A(new B(5)).foo().compute() + new C(true).getThis().hi() + new D("world").getThis().getThis().hi() + new E(new Int[5+3]).setItem(2, 3).getItem(2));
 }
 
-cvalue class A {
+@value class A {
 	var s: B;
 
 	def compute(): String = {
@@ -17,7 +17,7 @@ cvalue class A {
 	}
 }
 
-cvalue class B {
+@value class B {
 	var x: Int;
 
 	def hi(): String = {
@@ -25,7 +25,7 @@ cvalue class B {
 	}
 }
 
-cvalue class C {
+@value class C {
 	var x: Bool;
 
 	def hi(): String = {
@@ -42,7 +42,7 @@ cvalue class C {
 	}
 }
 
-cvalue class D {
+@value class D {
 	var x: String;
 
 	def hi(): String = {
@@ -54,7 +54,7 @@ cvalue class D {
 	}
 }
 
-cvalue class E {
+@value class E {
 	var x: Int[];
 
 	def getItem(pos: Int): Int = {

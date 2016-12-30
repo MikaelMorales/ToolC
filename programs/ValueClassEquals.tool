@@ -22,22 +22,22 @@ program ValueClassTest {
 
 }
 
-cvalue class A {
+@value class A {
     var x : Int;
 }
 
-cvalue class B {
+@value class B {
     var x: Int;
 }
 
-cvalue class C {
+@value class C {
     var x: A;
 }
 
-cvalue class D {
+@value class D {
     var x: String;
 }
 
-cvalue class E {
+@value class E {
     var x: Int[];
 }

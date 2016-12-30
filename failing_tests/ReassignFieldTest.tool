@@ -2,7 +2,7 @@ program ReassignFieldTest {
     println(new Test(5).reassign(7));
 }
 
-cvalue class Test {
+@value class Test {
     var x : Int;
 
     def reassign(newX: Int): Int = {

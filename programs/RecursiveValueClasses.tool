@@ -3,7 +3,7 @@ program RecursiveValueClasses {
 	println(new A(new B(5)).foo().foo().foo().foo().foo().compute());
 }
 
-cvalue class A {
+@value class A {
 	var s: B;
 
 	def compute(): String = {
@@ -15,7 +15,7 @@ cvalue class A {
 	}
 }
 
-cvalue class B {
+@value class B {
 	var x: Int;
 
 	def hi(): String = {

@@ -3,7 +3,7 @@ program ValueClassTest {
     println(new Test(2).sayHello());
 }
 
-cvalue class Test {
+@value class Test {
     var x : Int;
 
 	def sayHello(): String = {

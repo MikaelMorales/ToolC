@@ -12,7 +12,7 @@ class A {
 	}
 }
 
-cvalue class B {
+@value class B {
     var y: String;
 
     def print(): String = {

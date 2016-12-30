@@ -1,7 +1,7 @@
 program ValClassWithoutField {
 }
 
-cvalue class A {	
+@value class A {	
 	def sayHello(): String = {
 		return "Hello";
 	}

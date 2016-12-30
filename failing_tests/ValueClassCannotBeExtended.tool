@@ -2,7 +2,7 @@ program ValueClassCannotExtends {
 	println(new B().foo());
 }
 
-cvalue class A {
+@value class A {
     var x : Int;
 
 	def sayHello(): String = {

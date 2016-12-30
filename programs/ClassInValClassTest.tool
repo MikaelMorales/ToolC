@@ -18,7 +18,7 @@ class A {
 	}
 }
 
-cvalue class B {
+@value class B {
 	var x: A;
 
 	def sum(y: Int): Int = {

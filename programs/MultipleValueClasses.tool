@@ -3,7 +3,7 @@ program MultipleValueClasses {
 	println(new B(new A(5)).compute(3));
 }
 
-cvalue class A {
+@value class A {
     var x : Int;
 
 	def sayHello(): String = {
@@ -11,7 +11,7 @@ cvalue class A {
 	}
 }
 
-cvalue class B {
+@value class B {
 	var s: A;
 
 	def compute(num: Int): Int = {

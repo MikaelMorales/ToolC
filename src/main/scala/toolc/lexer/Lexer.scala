@@ -33,7 +33,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
     case "new"      => Some(NEW())
     case "println"  => Some(PRINTLN())
     case "do"       => Some(DO())
-    case "cvalue"    => Some(VALUE()) //Extension for the project
+    case "@value"   => Some(VALUE()) //Extension for the project
     case _          => None
   }
 
@@ -169,7 +169,7 @@ object Lexer extends Pipeline[File, Iterator[Token]] {
         case '*' => consume(); TIMES()
         case '/' => consume(); DIV()
 
-        case l if(l.isLetter) => {
+        case l if l.isLetter || l == '@' => {
           val identifier = new StringBuilder()
           identifier.append(currentChar)
           consume()
