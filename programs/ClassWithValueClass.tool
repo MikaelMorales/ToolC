@@ -1,4 +1,5 @@
 program ClassWithValueClass {
+    println("Expected: Hi ! ");
     println(new A().init().print());
 }
 

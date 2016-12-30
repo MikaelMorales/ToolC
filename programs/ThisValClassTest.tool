@@ -1,4 +1,5 @@
 program ThisValClassTest {
+    println("Expected: 5");
 	println(new Test(5).get().getField());
 }
 

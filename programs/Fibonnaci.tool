@@ -1,4 +1,5 @@
 program Fibonnaci {
+    println("Expected: 6765");
 	println("Fib 20 = " + new Fib().computeFibonnaci(20));
 }
 

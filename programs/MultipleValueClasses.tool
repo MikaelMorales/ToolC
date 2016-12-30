@@ -1,4 +1,5 @@
 program MultipleValueClasses {
+    println("Expected: 9");
 	println(new B(new A(5)).compute(3));
 }
 

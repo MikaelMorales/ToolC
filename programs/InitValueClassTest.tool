@@ -1,4 +1,5 @@
 program InitValueClassTest {
+    println("Expected: Hello");
 	println(new Test(5+6).sayHello());
 }
 

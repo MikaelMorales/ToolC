@@ -1,4 +1,5 @@
 program ValueClassThis {
+    println("Expected: 0");
 	println(new A(0).foo().foo().foo().foo().foo().compute());
 }
 

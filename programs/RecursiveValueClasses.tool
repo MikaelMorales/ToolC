@@ -1,4 +1,5 @@
 program RecursiveValueClasses {
+    println("Expected: hi!5");
 	println(new A(new B(5)).foo().foo().foo().foo().foo().compute());
 }
 

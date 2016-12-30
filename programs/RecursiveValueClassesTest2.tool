@@ -1,4 +1,5 @@
 program RecursiveValueClassesTest2 {
+    println("Expected: 55");
 	println(new A(5).foo().foo().foo().foo().foo().compute());
 }
 
