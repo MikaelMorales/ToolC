@@ -2,7 +2,7 @@ program ValueClassFailInstantiation {
 	println(new A().sayHello());
 }
 
-cvalue class A {
+@value class A {
     var x : Int;
 
 	def sayHello(): String = {

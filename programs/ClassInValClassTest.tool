@@ -1,7 +1,7 @@
 program ValueClassTest {
+    println("Expected: 27");
 	println(new B(new A().init(3, 4+5)).sum(5) + new B(new A().init(1, 2*2)).product(2));
 }
-//expected 27
 
 class A {
 	var x: Int;
@@ -18,7 +18,7 @@ class A {
 	}
 }
 
-cvalue class B {
+@value class B {
 	var x: A;
 
 	def sum(y: Int): Int = {

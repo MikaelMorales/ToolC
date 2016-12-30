@@ -1,8 +1,9 @@
 program RecursiveValueClassesTest2 {
+    println("Expected: 55");
 	println(new A(5).foo().foo().foo().foo().foo().compute());
 }
 
-cvalue class A {
+@value class A {
 	var s: Int;
 
 	def compute(): Int = {

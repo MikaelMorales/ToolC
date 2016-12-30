@@ -1,4 +1,5 @@
 program ClassWithValueClass {
+    println("Expected: Hi ! ");
     println(new A().init().print());
 }
 
@@ -11,7 +12,7 @@ class A {
 	}
 }
 
-cvalue class B {
+@value class B {
     var y: String;
 
     def print(): String = {

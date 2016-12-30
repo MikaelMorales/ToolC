@@ -69,7 +69,7 @@ object TypeChecking extends Pipeline[Program, Program] {
         case NewIntArray(size) =>
           tcExpr(size, TInt)
         case mc@MethodCall(obj, meth, _) =>
-          if(mc.getType == TError) ctx.reporter.error(s"Wrong arguments type in method call of method ${meth.value}")
+          if(mc.getType == TError) fatal(s"Wrong arguments type in method call of method ${meth.value}")
           obj.getType match {
             case TClass(classSymbol) =>
               classSymbol.lookupMethod(meth.value) match {

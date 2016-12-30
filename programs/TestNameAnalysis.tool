@@ -1,4 +1,5 @@
 program Example {
+  println("Expected: 42");
   println(new B().foo());
 }
  

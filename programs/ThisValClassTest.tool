@@ -1,8 +1,9 @@
 program ThisValClassTest {
+    println("Expected: 5");
 	println(new Test(5).get().getField());
 }
 
-cvalue class Test {
+@value class Test {
 	var x: Int;
 
 	def get(): Test = {
