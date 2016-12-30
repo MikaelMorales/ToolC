@@ -45,8 +45,8 @@ object CodeGeneration extends Pipeline[Program, Unit] {
         cf.addMethod(typeToDescr(decl.retType.getType), method.name, args)
       }
 
-      /* Projet Extension
-        Force value class methods to have the field as an argument. Since they are declared
+      /* Project Extension
+        Force value class methods to have the field as the first argument. Since they are declared
         as static methods, they need to have access to the field.
        */
       val mh = method.classSymbol match {
@@ -90,8 +90,10 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       val methSym = mt.getSymbol
 
       /*
-        Project Extension, add the field to the argument of the method
-        declaration and method symbol if it is a value class.
+        Project Extension: If it is a value class, we map the field of
+        the value class to the first position (0).
+        It replaces the instance of the class which is for a standard class
+        at position 0, by the field of the value class.
        */
       val argMappings = methSym.classSymbol match {
         case vcs: ValueClassSymbol =>
@@ -114,7 +116,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
       // Return with the correct opcode, based on the type of the return expression
       mt.retExpr.getType match {
         case TInt | TBoolean => ch << IRETURN
-        case TValueClass(vcs) => findValueClassType(vcs.getField.get.getType) match {
+        case TValueClass(vcs) => findRootType(vcs.getField.get.getType) match {
           case TInt | TBoolean => ch << IRETURN
           case _ => ch << ARETURN
         }
@@ -188,13 +190,17 @@ object CodeGeneration extends Pipeline[Program, Unit] {
           mapping.get(id.value) match {
             case Some(pos) =>
               cGenExpr(expr)
-
-              findValueClassType(id.getType) match {
+              /* Find the root type of the variable. Since value class
+                 can wrap another value class.
+                 It stores the variable at the right position.
+               */
+              findRootType(id.getType) match {
                 case TInt | TBoolean => ch << IStore(pos)
                 case TIntArray | TString | TClass(_) => ch << AStore(pos)
                 case _ =>
               }
-
+            // This case should never happen with a value class, since we define
+            // the field as an argument of the method.
             case None =>
               ch << ALOAD_0
               cGenExpr(expr)
@@ -356,12 +362,17 @@ object CodeGeneration extends Pipeline[Program, Unit] {
             case (TString, TString) | (TIntArray, TIntArray) | (TClass(_), TClass(_)) =>
               ch << If_ACmpEq(trueCase)
               compare()
+
+            /**
+              * We first compare the name of two value classes to be sure that they are "instances" of the same value class.
+              * If they are not, we return 0. Otherwise, we compare the two fields.
+              */
             case (TValueClass(va), TValueClass(vb)) =>
               if(va.name != vb.name) {
-                ch << POP << POP
+                ch << POP << POP // POP the two useless expression of the stack since we don't compare them (If_XCmpEq), they aren't pop from the stack.
                 ch << ICONST_0
               } else {
-                findValueClassType(va.getField.get.getType) match {
+                findRootType(va.getField.get.getType) match {
                   case TInt | TBoolean => ch << If_ICmpEq(trueCase)
                   case TString | TIntArray | TClass(_) => ch << If_ACmpEq(trueCase)
                   case _ => sys.error("Matching an unexpected type field on equals")
@@ -370,6 +381,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               }
             case _ => sys.error("Error on equals in code generation")
           }
+
         case ArrayRead(arr, index) =>
           cGenExpr(arr)
           cGenExpr(index)
@@ -381,11 +393,15 @@ object CodeGeneration extends Pipeline[Program, Unit] {
           cGenExpr(size)
           ch << NewArray.primitive("T_INT")
 
+        /*
+          If we are in a value class we load the field on the stack. If it is another
+          value class we recursively load the root field.
+         */
         case t@This() =>
           t.getType match {
             case TClass(_) => ch << ALOAD_0
             case TValueClass(vcs) =>
-              findValueClassType(vcs.getField.get.getType) match {
+              findRootType(vcs.getField.get.getType) match {
                 case TInt | TBoolean => ch << ILoad(mapping(vcs.getField.get.name))
                 case TIntArray | TString | TClass(_) => ch << ALoad(mapping(vcs.getField.get.name))
                 case _ => sys.error("Cannot find this type")
@@ -407,11 +423,12 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               cGenExpr(obj)
               args foreach cGenExpr
               ch << InvokeVirtual(cs.name, meth.value, returnString.toString())
+
             case TValueClass(vcs) =>
               //Create return type string of the method
               val returnString = new StringBuilder
               returnString.append("(")
-              returnString.append(typeToDescr(vcs.getField.get.getType)) // Ajoute le type du field en dernier argument
+              returnString.append(typeToDescr(vcs.getField.get.getType)) // Add the type of the field of the value class as the first argument.
               args.foreach(a => returnString.append(typeToDescr(a.getType)))
               returnString.append(")")
               returnString.append(typeToDescr(x.getType))
@@ -424,6 +441,7 @@ object CodeGeneration extends Pipeline[Program, Unit] {
             case _ => sys.error("Error on method symbol in code generation")
           }
 
+        //Instead of pushing the value class on the heap, we push the field of the value class on the stack.
         case NewValueClass(_, e) =>
           cGenExpr(e)
 
@@ -443,8 +461,8 @@ object CodeGeneration extends Pipeline[Program, Unit] {
               id.getType match {
                 case TInt | TBoolean => ch << ILoad(pos)
                 case TIntArray | TString | TClass(_) => ch << ALoad(pos)
-                case TValueClass(vcs) =>
-                  findValueClassType(vcs.getField.get.getType) match {
+                case TValueClass(vcs) => // Load the root field of the value class.
+                  findRootType(vcs.getField.get.getType) match {
                     case TInt | TBoolean => ch << ILoad(pos)
                     case TIntArray | TString | TClass(_) => ch << ALoad(pos)
                     case _ =>
@@ -472,9 +490,9 @@ object CodeGeneration extends Pipeline[Program, Unit] {
     }
 
 
-    def findValueClassType(tpe: Type): Type = {
+    def findRootType(tpe: Type): Type = {
       tpe match {
-        case TValueClass(vcs) => findValueClassType(vcs.getField.get.getType)
+        case TValueClass(vcs) => findRootType(vcs.getField.get.getType)
         case _ => tpe
       }
     }

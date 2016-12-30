@@ -31,6 +31,10 @@ object NameAnalysis extends Pipeline[Program, Program] {
         else if (c.id.value == prog.main.id.value)
           ctx.reporter.error("A class can't have the same name as program")
 
+        /**
+          * Create a new symbol depending on the type of the class.
+          * If it's a value class, it checks that there is only one field.
+          */
         val newClass = c match {
           case cd: ClassDecl => new ClassSymbol(cd.id.value).setPos(cd.file, cd.line)
           case vcd: ValueClassDecl =>
@@ -47,7 +51,9 @@ object NameAnalysis extends Pipeline[Program, Program] {
         }
       }
 
-      // Set parent Symbols
+      /** Set parent Symbols. For value classes we make sure that they aren't extended and that
+        * they don't extends anything.
+        */
       for {
         cls <- prog.classes
         clSym = global.classes(cls.id.value)
@@ -297,7 +303,7 @@ object NameAnalysis extends Pipeline[Program, Program] {
       methodSymbol.get.overridden match {
         case Some(ms) =>
           if(ms.getType != methodSymbol.get.getType) ctx.reporter.error(s"Overloading ${methodSymbol.get.name} is not permitted in Tool")
-          val listTupleArgs = methodSymbol.get.params.values.map(arg => arg.getType).zip(ms.params.values.map(x => x.getType))
+          val listTupleArgs = methodSymbol.get.argList.map(arg => arg.getType).zip(ms.argList.map(x => x.getType))
           val matchArgs = listTupleArgs.forall(tpe => tpe._1 == tpe._2)
           if(!matchArgs) ctx.reporter.error(s"Overloading ${methodSymbol.get.name} is not permitted in Tool")
         case None =>
@@ -400,7 +406,7 @@ object NameAnalysis extends Pipeline[Program, Program] {
               ctx.reporter.error(s"Cannot instantiate ${vcs.name} without specifying the field")
            }
 
-          /* Project extension */
+        /* Project extension: set the symbol of the value class declaration */
         case NewValueClass(tpe, expr: ExprTree) =>
           gs.lookupClass(tpe.value) match {
             case None => ctx.reporter.error("The object does not exists")

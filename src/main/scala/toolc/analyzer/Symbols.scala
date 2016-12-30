@@ -53,7 +53,9 @@ object Symbols {
 
   class MainSymbol(val name: String) extends Symbol
 
-  /* Project extension */
+  /* Project extension: Represent the symbol of a class.
+     It is extended by ClassSymbol and ValueClassSymbol
+   */
   sealed trait AbstractClassSymbol extends Symbol {
     var methods = Map[String, MethodSymbol]()
     var members = Map[String, VariableSymbol]()
@@ -77,6 +79,11 @@ object Symbols {
     }
   }
 
+  /**
+    * Symbol of a value class
+    * @param name The name of the class
+    * @param fieldId The name of the field of the value class
+    */
   class ValueClassSymbol(val name: String, val fieldId: String) extends AbstractClassSymbol {
     override def getType = TValueClass(this)
     override def setType(t: Type) = sys.error("Cannot set the symbol of a ValueClassSymbol")

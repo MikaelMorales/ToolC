@@ -85,7 +85,7 @@ object Printer {
         )
       case ValueClassDecl(id, vars, methods) =>
         Stacked(
-          "cvalue class " <:> rec(id) <:> " {",
+          "@value class " <:> rec(id) <:> " {",
           Indented(Stacked(
             (vars map rec) ++ (Raw("") :: (methods map rec))
           )),
@@ -185,8 +185,11 @@ object Printer {
         "(new Int[" <:> rec(size) <:> "])"
       case New(tpe) =>
         "(new " <:> rec(tpe) <:> "())"
+
+      /* Project Extension */
       case NewValueClass(tpe, expr) =>
         "(new " <:> rec(tpe) <:> "(" <:> rec(expr) <:> "))"
+
       case Not(expr) =>
         "(!(" <:> rec(expr) <:> "))"
     }
