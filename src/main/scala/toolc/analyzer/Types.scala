@@ -49,6 +49,12 @@ object Types {
     override def toString = classSymbol.name
   }
 
+  /**
+    * Represent the type of a value class. A value class is a subtype of itself
+    * and TValueObject which represent the superclass of value classes.
+    *
+    * @param valueClassSymbol The symbol of the value class
+    */
   case class TValueClass(valueClassSymbol: ValueClassSymbol) extends Type {
     override def isSubTypeOf(tpe: Type): Boolean =
       tpe == valueClassSymbol.getType || tpe == TValueObject

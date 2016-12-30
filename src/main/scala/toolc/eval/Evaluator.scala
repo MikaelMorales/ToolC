@@ -143,10 +143,15 @@ class Evaluator(ctx: Context, prog: Program) {
       ArrayValue(new Array[Int](sizeArray))
   }
 
-  /*
-    This method compare two value class equality by comparing the name of the class and then the value of
-    the unique field of a value class.
-   */
+  /**
+    * This method compare two value class equality by comparing the name of the class and then the value of
+    * the unique field of a value class.
+    * @param objVal1 Left hand side value class
+    * @param vcs1 Left hand side value class symbol
+    * @param objVal2 Right hand side value class
+    * @param vcs2 Right hand side value class symbol
+    * @return BoolValue(true) If the two value classes are equal otherwise BoolValue(false)
+    */
   @tailrec
   final def valueClassEquals(objVal1: ObjectValue, vcs1: ValueClassSymbol, objVal2: ObjectValue, vcs2: ValueClassSymbol): BoolValue = {
     (objVal1.getField(vcs1.fieldId), objVal2.getField(vcs2.fieldId)) match {

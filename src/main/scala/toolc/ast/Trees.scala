@@ -34,7 +34,9 @@ object Trees {
 
   // Definitions
   sealed trait DefTree extends Tree
-  /* Project extension */
+  /* Project extension: Represent the declaration of a class.
+     It is extend by ClassDecl and ValueClassDecl.
+  */
   sealed trait Class extends DefTree with Symbolic[AbstractClassSymbol] {
     val id: Identifier
     val methods: List[MethodDecl]

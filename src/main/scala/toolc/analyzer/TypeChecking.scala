@@ -54,7 +54,7 @@ object TypeChecking extends Pipeline[Program, Program] {
           if (lhs.getType.isSubTypeOf(TObject)) {
             tcExpr(lhs, TObject)
             tcExpr(rhs, TObject)
-          } else if(lhs.getType.isSubTypeOf(TValueObject)) {
+          } else if(lhs.getType.isSubTypeOf(TValueObject)) { //Extension
             tcExpr(lhs, TValueObject)
             tcExpr(rhs, TValueObject)
           } else {

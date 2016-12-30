@@ -141,7 +141,9 @@ class ASTConstructorLL1 extends ASTConstructor {
     }
   }
 
-  /* Project Extension */
+  /*
+  * Differentiate the cases where we instantiate a standard class or a value class
+  */
   def constructNewClass(newToken: Token, id: NodeOrLeaf[Token], ptree: NodeOrLeaf[Token]): ExprTree = {
     ptree match {
       case Node('NewClassSeq ::= List(RPAREN()), _) =>

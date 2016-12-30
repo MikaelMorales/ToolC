@@ -58,7 +58,6 @@ object Parser extends Pipeline[Iterator[Token], Program] {
     'Identifier ::= IDSENT
   ))
 
-  // TODO: Transform this to an LL(1) grammar
    val ll1Grammar = Grammar('Program, List[Rules[Token]](
     'Program ::= 'MainObject ~ 'ClassDecls ~ EOF(),
     'MainObject ::= PROGRAM() ~ 'Identifier ~ LBRACE() ~ 'Stmts ~ RBRACE(),

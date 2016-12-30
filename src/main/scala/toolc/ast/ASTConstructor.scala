@@ -25,6 +25,9 @@ class ASTConstructor {
     }
   }
 
+  /*
+  * Updated the method to construct value class declarations
+  */
   def constructClass(ptree: NodeOrLeaf[Token]): Class = {
     ptree match {
       case Node(
