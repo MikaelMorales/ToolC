@@ -1,4 +1,4 @@
-program Test {
+program ArgumentNameCheck {
   println(new A(5).foo(10));
 }
  
