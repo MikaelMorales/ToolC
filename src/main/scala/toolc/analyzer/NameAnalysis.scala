@@ -208,6 +208,12 @@ object NameAnalysis extends Pipeline[Program, Program] {
           case None => sys.error("Method was not declared !")
           case Some(methodSymbol) =>
             for (args <- method.args) {
+              //Value class check that the argument name is not the same as the value class field.
+              myClass match {
+                case vcs: ValueClassSymbol if vcs.fieldId == args.id.value =>
+                  ctx.reporter.error(s"Argument of method ${method.id.value} cannot have the same name as the field of the value class ${vcs.name} !")
+                case _ =>
+              }
               val newArg = new VariableSymbol(args.id.value)
 
               methodSymbol.lookupVar(args.id.value) match {
