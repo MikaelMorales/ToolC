@@ -1,0 +1,10 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{+Symbol}{\PYGZsq{}ClassDeclaration} \PYG{o}{::=} \PYG{n+nc}{CLASS}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}Identifier} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}OptExtends} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}ClassBody}
+  \PYG{o}{|} \PYG{n+nc}{VALUE}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{n+nc}{CLASS}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}Identifier} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}ClassBody}\PYG{o}{,}
+
+
+\PYG{+Symbol}{\PYGZsq{}NewExpr} \PYG{o}{::=} \PYG{n+nc}{NEW}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}NewSeq} \PYG{o}{|} \PYG{+Symbol}{\PYGZsq{}Factor}\PYG{o}{,}
+\PYG{+Symbol}{\PYGZsq{}NewSeq} \PYG{o}{::=} \PYG{n+nc}{INT}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{n+nc}{LBRACKET}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}Expression} \PYG{o}{\PYGZti{}} \PYG{n+nc}{RBRACKET}\PYG{o}{()}
+  \PYG{o}{|} \PYG{+Symbol}{\PYGZsq{}Identifier} \PYG{o}{\PYGZti{}} \PYG{n+nc}{LPAREN}\PYG{o}{()} \PYG{o}{\PYGZti{}} \PYG{+Symbol}{\PYGZsq{}NewClassSeq}\PYG{o}{,}
+\PYG{+Symbol}{\PYGZsq{}NewClassSeq} \PYG{o}{::=} \PYG{n+nc}{RPAREN}\PYG{o}{()} \PYG{o}{|} \PYG{+Symbol}{\PYGZsq{}Expression} \PYG{o}{\PYGZti{}} \PYG{n+nc}{RPAREN}\PYG{o}{(),}
+\end{Verbatim}

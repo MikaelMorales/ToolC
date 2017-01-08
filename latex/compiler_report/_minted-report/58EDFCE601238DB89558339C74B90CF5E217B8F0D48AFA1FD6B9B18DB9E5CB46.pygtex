@@ -1,0 +1,20 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{case} \PYG{n+nc}{Assign}\PYG{o}{(}\PYG{n}{id}\PYG{o}{,} \PYG{n}{expr}\PYG{o}{)} \PYG{k}{=\PYGZgt{}}
+  \PYG{n}{mapping}\PYG{o}{.}\PYG{n}{get}\PYG{o}{(}\PYG{n}{id}\PYG{o}{.}\PYG{n}{value}\PYG{o}{)} \PYG{k}{match} \PYG{o}{\PYGZob{}}
+    \PYG{k}{case} \PYG{n+nc}{Some}\PYG{o}{(}\PYG{n}{pos}\PYG{o}{)} \PYG{k}{=\PYGZgt{}}
+      \PYG{n}{cGenExpr}\PYG{o}{(}\PYG{n}{expr}\PYG{o}{)}
+      \PYG{n}{findRootType}\PYG{o}{(}\PYG{n}{id}\PYG{o}{.}\PYG{n}{getType}\PYG{o}{)} \PYG{k}{match} \PYG{o}{\PYGZob{}}
+        \PYG{k}{case} \PYG{n+nc}{TInt} \PYG{o}{|} \PYG{n+nc}{TBoolean} \PYG{k}{=\PYGZgt{}}
+          \PYG{n}{ch} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n+nc}{IStore}\PYG{o}{(}\PYG{n}{pos}\PYG{o}{)}
+        \PYG{k}{case} \PYG{n+nc}{TIntArray} \PYG{o}{|} \PYG{n+nc}{TString} \PYG{o}{|} \PYG{n+nc}{TClass}\PYG{o}{(}\PYG{k}{\PYGZus{}}\PYG{o}{)} \PYG{k}{=\PYGZgt{}}
+          \PYG{n}{ch} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n+nc}{AStore}\PYG{o}{(}\PYG{n}{pos}\PYG{o}{)}
+        \PYG{k}{case} \PYG{k}{\PYGZus{}} \PYG{k}{=\PYGZgt{}}
+      \PYG{o}{\PYGZcb{}}
+
+    \PYG{k}{case} \PYG{n+nc}{None} \PYG{k}{=\PYGZgt{}}
+      \PYG{n}{ch} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n+nc}{ALOAD\PYGZus{}0}
+      \PYG{n}{cGenExpr}\PYG{o}{(}\PYG{n}{expr}\PYG{o}{)}
+      \PYG{n}{ch} \PYG{o}{\PYGZlt{}\PYGZlt{}}
+        \PYG{n+nc}{PutField}\PYG{o}{(}\PYG{n}{cname}\PYG{o}{,} \PYG{n}{id}\PYG{o}{.}\PYG{n}{value}\PYG{o}{,} \PYG{n}{typeToDescr}\PYG{o}{(}\PYG{n}{id}\PYG{o}{.}\PYG{n}{getType}\PYG{o}{))}
+  \PYG{o}{\PYGZcb{}}
+\end{Verbatim}

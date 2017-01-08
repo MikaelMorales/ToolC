@@ -1,0 +1,13 @@
+During the semester we implemented a compiler for a Java-like Language called Tool. It generates bytecode from tool program to be able to execute it. \newline
+The compiler is constituted by several steps.
+
+\begin{enumerate}
+\item The Lexer generates Token from the input files
+\item The Parser which contains the LL1 grammar and checks if the program's syntax is valid. It also contains an AST constructor which creates abstract syntax trees.
+\item The Name analyser in which we associate symbols to the declarations. We also check basic rules like inheritance cycles, overloadings ...
+\item A Type Checker which rejects all the remaining invalid programs with type inconsistencies.
+\item A Code generator which generates the bytecode contained in the created class files.
+\end{enumerate}
+
+Our extension bring the concept of \textit{value classes} to the language. \newline 
+A value class is a special kind of class which contains only one field and is represented only by this field. The point of value classes is to avoid allocating runtime objects. In order to do so, instead of allocating memory to a value class, it push its representative on the stack.

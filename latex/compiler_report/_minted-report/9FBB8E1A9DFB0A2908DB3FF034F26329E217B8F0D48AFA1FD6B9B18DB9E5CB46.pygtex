@@ -1,0 +1,8 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{case} \PYG{n}{t}\PYG{n+nd}{@This}\PYG{o}{()} \PYG{k}{=\PYGZgt{}}
+  \PYG{n}{findRootType}\PYG{o}{(}\PYG{n}{t}\PYG{o}{.}\PYG{n}{getType}\PYG{o}{)} \PYG{k}{match} \PYG{o}{\PYGZob{}}
+    \PYG{k}{case} \PYG{n+nc}{TInt} \PYG{o}{|} \PYG{n+nc}{TBoolean} \PYG{k}{=\PYGZgt{}} \PYG{n}{ch} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n+nc}{ILOAD\PYGZus{}0}
+    \PYG{k}{case} \PYG{n+nc}{TIntArray} \PYG{o}{|} \PYG{n+nc}{TString} \PYG{o}{|} \PYG{n+nc}{TClass}\PYG{o}{(}\PYG{k}{\PYGZus{}}\PYG{o}{)} \PYG{k}{=\PYGZgt{}}
+      \PYG{n}{ch} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n+nc}{ALOAD\PYGZus{}0}
+  \PYG{o}{\PYGZcb{}}
+\end{Verbatim}

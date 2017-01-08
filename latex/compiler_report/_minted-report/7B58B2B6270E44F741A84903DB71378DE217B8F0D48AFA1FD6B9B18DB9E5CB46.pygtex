@@ -1,0 +1,29 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{sealed} \PYG{k}{trait} \PYG{n+nc}{AbstractClassSymbol} \PYG{k}{extends} \PYG{n+nc}{Symbol} \PYG{o}{\PYGZob{}}
+    \PYG{k}{var} \PYG{n}{methods} \PYG{k}{=} \PYG{n+nc}{Map}\PYG{o}{[}\PYG{k+kt}{String}, \PYG{k+kt}{MethodSymbol}\PYG{o}{]()}
+    \PYG{k}{var} \PYG{n}{members} \PYG{k}{=} \PYG{n+nc}{Map}\PYG{o}{[}\PYG{k+kt}{String}, \PYG{k+kt}{VariableSymbol}\PYG{o}{]()}
+    \PYG{k}{var} \PYG{n}{parent}\PYG{k}{:} \PYG{k+kt}{Option}\PYG{o}{[}\PYG{k+kt}{ClassSymbol}\PYG{o}{]} \PYG{k}{=} \PYG{n+nc}{None}
+
+    \PYG{k}{def} \PYG{n}{lookupMethod}\PYG{o}{(}\PYG{n}{n}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{)}\PYG{k}{:} \PYG{k+kt}{Option}\PYG{o}{[}\PYG{k+kt}{MethodSymbol}\PYG{o}{]}
+    \PYG{k}{def} \PYG{n}{lookupVar}\PYG{o}{(}\PYG{n}{n}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{)}\PYG{k}{:} \PYG{k+kt}{Option}\PYG{o}{[}\PYG{k+kt}{VariableSymbol}\PYG{o}{]}
+  \PYG{o}{\PYGZcb{}}
+
+\PYG{k}{class} \PYG{n+nc}{ClassSymbol}\PYG{o}{(}\PYG{k}{val} \PYG{n}{name}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{)}
+\PYG{k}{extends} \PYG{n+nc}{AbstractClassSymbol}
+\PYG{o}{\PYGZob{}}\PYG{c+cm}{/*Implementation*/}\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{class} \PYG{n+nc}{ValueClassSymbol}\PYG{o}{(}\PYG{k}{val} \PYG{n}{name}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{,}\PYG{k}{val} \PYG{n}{fieldId}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{)}
+\PYG{k}{extends} \PYG{n+nc}{AbstractClassSymbol}
+\PYG{o}{\PYGZob{}}
+  \PYG{k}{override} \PYG{k}{def} \PYG{n}{getType} \PYG{k}{=} \PYG{n+nc}{TValueClass}\PYG{o}{(}\PYG{k}{this}\PYG{o}{)}
+  \PYG{k}{override} \PYG{k}{def} \PYG{n}{setType}\PYG{o}{(}\PYG{n}{t}\PYG{k}{:} \PYG{k+kt}{Type}\PYG{o}{)} \PYG{k}{=}
+  \PYG{n}{sys}\PYG{o}{.}\PYG{n}{error}\PYG{o}{(}\PYG{l+s}{\PYGZdq{}Cannot set the symbol of a ValueClassSymbol\PYGZdq{}}\PYG{o}{)}
+
+  \PYG{k}{def} \PYG{n}{getField}\PYG{k}{:} \PYG{k+kt}{Option}\PYG{o}{[}\PYG{k+kt}{VariableSymbol}\PYG{o}{]} \PYG{k}{=}
+  \PYG{n}{members}\PYG{o}{.}\PYG{n}{get}\PYG{o}{(}\PYG{n}{fieldId}\PYG{o}{)}
+  \PYG{k}{override} \PYG{k}{def} \PYG{n}{lookupMethod}\PYG{o}{(}\PYG{n}{n}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{)} \PYG{k}{=}
+  \PYG{n}{methods}\PYG{o}{.}\PYG{n}{get}\PYG{o}{(}\PYG{n}{n}\PYG{o}{)}
+  \PYG{k}{override} \PYG{k}{def} \PYG{n}{lookupVar}\PYG{o}{(}\PYG{n}{n}\PYG{k}{:} \PYG{k+kt}{String}\PYG{o}{)} \PYG{k}{=}
+  \PYG{n}{members}\PYG{o}{.}\PYG{n}{get}\PYG{o}{(}\PYG{n}{n}\PYG{o}{)}
+ \PYG{o}{\PYGZcb{}}
+\end{Verbatim}

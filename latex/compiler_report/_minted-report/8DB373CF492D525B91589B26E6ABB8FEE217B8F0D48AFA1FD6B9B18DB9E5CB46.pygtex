@@ -1,0 +1,18 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{sealed} \PYG{k}{trait} \PYG{n+nc}{Class} \PYG{k}{extends} \PYG{n+nc}{DefTree}
+\PYG{k}{with} \PYG{n+nc}{Symbolic}\PYG{o}{[}\PYG{k+kt}{AbstractClassSymbol}\PYG{o}{]} \PYG{o}{\PYGZob{}}
+    \PYG{k}{val} \PYG{n}{id}\PYG{k}{:} \PYG{k+kt}{Identifier}
+    \PYG{k}{val} \PYG{n}{methods}\PYG{k}{:} \PYG{k+kt}{List}\PYG{o}{[}\PYG{k+kt}{MethodDecl}\PYG{o}{]}
+    \PYG{k}{val} \PYG{n}{parent}\PYG{k}{:} \PYG{k+kt}{Option}\PYG{o}{[}\PYG{k+kt}{Identifier}\PYG{o}{]}
+    \PYG{k}{val} \PYG{n}{vars}\PYG{k}{:} \PYG{k+kt}{List}\PYG{o}{[}\PYG{k+kt}{VarDecl}\PYG{o}{]}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{case} \PYG{k}{class} \PYG{n+nc}{ClassDecl}\PYG{o}{(}\PYG{n}{id}\PYG{k}{:} \PYG{k+kt}{Identifier}\PYG{o}{,} \PYG{n}{parent}\PYG{k}{:} \PYG{k+kt}{Option}\PYG{o}{[}\PYG{k+kt}{Identifier}\PYG{o}{],}
+\PYG{n}{vars}\PYG{k}{:} \PYG{k+kt}{List}\PYG{o}{[}\PYG{k+kt}{VarDecl}\PYG{o}{],} \PYG{n}{methods}\PYG{k}{:} \PYG{k+kt}{List}\PYG{o}{[}\PYG{k+kt}{MethodDecl}\PYG{o}{])}
+\PYG{k}{extends} \PYG{n+nc}{Class}
+
+\PYG{k}{case} \PYG{k}{class} \PYG{n+nc}{ValueClassDecl}\PYG{o}{(}\PYG{n}{id}\PYG{k}{:} \PYG{k+kt}{Identifier}\PYG{o}{,} \PYG{n}{vars}\PYG{k}{:} \PYG{k+kt}{List}\PYG{o}{[}\PYG{k+kt}{VarDecl}\PYG{o}{],}
+\PYG{n}{methods}\PYG{k}{:} \PYG{k+kt}{List}\PYG{o}{[}\PYG{k+kt}{MethodDecl}\PYG{o}{])} \PYG{k}{extends} \PYG{n+nc}{Class} \PYG{o}{\PYGZob{}}
+    \PYG{k}{override} \PYG{k}{val} \PYG{n}{parent} \PYG{k}{=} \PYG{n+nc}{None}
+\PYG{o}{\PYGZcb{}}
+\end{Verbatim}

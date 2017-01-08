@@ -1,0 +1,154 @@
+The extension involves many minor changes in every step of the pipeline and major changes in the code generation phase.
+
+\subsection{Theoretical Background}
+To understand the behavior of value classes, we studied the online documentation \cite{ScalaDoc}. 
+It helps us to understand how value classes work, how they are represented in memory and their limitations. 
+
+\subsection{Implementation Details}
+We detail in this section the changes in the implementation.
+
+\subsubsection{Lexer}
+We defined in the lexer a new keyword, \textbf{@value}, which is used to declare a value class.
+
+\subsubsection{Parser}
+\begin{minted}{scala}
+'ClassDeclaration ::= CLASS() ~ 'Identifier ~ 'OptExtends ~ 'ClassBody 
+  | VALUE() ~ CLASS() ~ 'Identifier ~ 'ClassBody,
+
+'NewExpr ::= NEW() ~ 'NewSeq | 'Factor,
+'NewSeq ::= INT() ~ LBRACKET() ~ 'Expression ~ RBRACKET() 
+  | 'Identifier ~ LPAREN() ~ 'NewClassSeq,
+'NewClassSeq ::= RPAREN() | 'Expression ~ RPAREN(),
+\end{minted}
+
+We upgraded the grammar to recognize a value class declaration. \newline
+A value class declaration consists of the VALUE() token, followed by CLASS() token, an identifier and the class body. \newline
+We can see here that the value class cannot extends anything. \newline
+Furthermore, we defined the instantiation of a value class A as new A(x) where x is an expression representing the field.
+
+To be able to construct the abstract syntax tree, we defined a new class declaration called ValueClassDecl. 
+Both class declarations extends a trait called Class to which a symbol is attached. \newline
+Even if a value class contains only one variable and has no parent, we kept a list of variables and set the parent to None, to increase modularity.
+
+\begin{minted}{scala}
+sealed trait Class extends DefTree 
+with Symbolic[AbstractClassSymbol] {
+    val id: Identifier
+    val methods: List[MethodDecl]
+    val parent: Option[Identifier]
+    val vars: List[VarDecl]
+}
+
+case class ClassDecl(id: Identifier, parent: Option[Identifier],
+vars: List[VarDecl], methods: List[MethodDecl]) 
+extends Class
+
+case class ValueClassDecl(id: Identifier, vars: List[VarDecl],
+methods: List[MethodDecl]) extends Class {
+    override val parent = None
+}
+\end{minted}
+\newpage
+\subsubsection{Name Analysis}
+We defined a trait AbstractClassSymbol which is extended by ClassSymbol and ValueClassSymbol to keep a high modularity.
+We also added a field "fieldId" to ValueClassSymbol to get the field in the Map members more easily. \newline
+We set the symbols to the classes and we check that value classes have a unique field. \newline
+Since we add the field of a value class as an argument to every method defined in this value class, we needed to make sure that there was no argument with the same name as the field, to avoid having unexpected behaviours. So we throw an error if there is an argument of a value class method with the same name as the field in this phase.
+\begin{minted}{scala}
+sealed trait AbstractClassSymbol extends Symbol {
+    var methods = Map[String, MethodSymbol]()
+    var members = Map[String, VariableSymbol]()
+    var parent: Option[ClassSymbol] = None
+
+    def lookupMethod(n: String): Option[MethodSymbol]
+    def lookupVar(n: String): Option[VariableSymbol]
+  }
+
+class ClassSymbol(val name: String) 
+extends AbstractClassSymbol 
+{/*Implementation*/}
+  
+class ValueClassSymbol(val name: String,val fieldId: String)
+extends AbstractClassSymbol
+{
+  override def getType = TValueClass(this)
+  override def setType(t: Type) = 
+  sys.error("Cannot set the symbol of a ValueClassSymbol")
+
+  def getField: Option[VariableSymbol] =
+  members.get(fieldId)
+  override def lookupMethod(n: String) =
+  methods.get(n)
+  override def lookupVar(n: String) =
+  members.get(n)
+ }
+\end{minted}
+\newpage
+\subsubsection{Type Checking}
+Firstly, we defined a new type called TValueClass which is a subtype of itself and of TValueObject which represents the top of the value class hierarchy. \newline
+After that, we upgrade the equality type checking to allow comparison between two value classes. \newline
+Finally, we also make sure that when we instantiate value classes, the expected type of the field is satisfied. \newline
+
+\subsubsection{Code Generation}
+First, we removed the default constructor for value classes. 
+Then as explained earlier, we force value classes methods to have the field as the first argument. 
+Since we set methods as static, they need to have access to the field. \newline
+Since conventions puts the object reference at position zero in the local variables pool, we decided to put the field of the value class instead, since there is no concrete instance of a value class when generating the bytecode. It allows us to define "this" as:
+\begin{minted}{scala}
+case t@This() =>
+  findRootType(t.getType) match {
+    case TInt | TBoolean => ch << ILOAD_0
+    case TIntArray | TString | TClass(_) => 
+      ch << ALOAD_0
+  }
+\end{minted}
+where we always load what is contained in the position zero in the local variables pool.
+
+We defined the method findRootType to access the type of the root field. 
+If several value classes are wrapped between each other, the root field is the first non value class field. 
+This method is used throughout the code generation phase to be able to pattern match on the types previously defined in Tool (TInt, TString, TBoolean, TIntArray, TClass).
+\begin{minted}{scala}
+def findRootType(tpe: Type): Type = {
+  tpe match {
+    case TValueClass(vcs) => 
+      findRootType(vcs.getField.get.getType)
+    case _ => tpe
+  }
+}
+\end{minted}
+
+\paragraph{Assign}
+Bellow is the modified code handling the assign statement.
+\begin{minted}{scala}
+case Assign(id, expr) =>
+  mapping.get(id.value) match {
+    case Some(pos) =>
+      cGenExpr(expr)
+      findRootType(id.getType) match {
+        case TInt | TBoolean => 
+          ch << IStore(pos)
+        case TIntArray | TString | TClass(_) => 
+          ch << AStore(pos)
+        case _ =>
+      }
+
+    case None =>
+      ch << ALOAD_0
+      cGenExpr(expr)
+      ch << 
+        PutField(cname, id.value, typeToDescr(id.getType))
+  }
+\end{minted}
+For the Assign statement, we clearly see what we were talking about earlier. 
+If you assign a value class to a variable, only the field will be really assigned, not the actual "instance" of the value class.
+
+\paragraph{Equals}
+We first compare the name of two value classes to be sure that they are "instances" of the same value class. If they are not, we return 0. Otherwise, we compare the two fields, and return the result of the comparison.
+
+\paragraph{Method Call}
+Add the type of the field of the value class as the first argument.
+Instead of calling invokevirtual, we call InvokeStatic since methods of value class are static.
+
+\paragraph{New Value Class}
+Instead of allocating the instance of the value class, we generate bytecode only for the expression of the root field.
+\newpage
