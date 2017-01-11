@@ -1,9 +1,9 @@
 
 Value class signatures are similar to class signatures in tool, with the keyword class preceded by \textbf{@value}, to differentiate a value class declaration from a standard class declaration. \newline
-Unlike scala, a value class does not have to extends AnyVal, we choose to forbid value classes to extends anything, and as in scala, value classes cannot be extended.\newline
+Unlike scala, a value class does not have to extend AnyVal, we choose to forbid value classes to extend anything, and as in scala, value classes cannot be extended.\newline
 A value class can only contain strictly one field, which needs to be declared at the beginning of the value class, and then followed by method implementations. The field of a value class object cannot be modified after the instantiation of the object.\newline
 
-First of all, a very simple example of a value class which shows how a value class behaves with a primitive type field. The user creates an instance of the value class A, and initializes the field of the class A to 2, and called the method sayHello defined in the value class A which returns "Hello" concatenated with the field, so in this case it returns "Hello2".
+First of all, a very simple example of a value class which shows how a value class behaves with a primitive type field. The user creates an instance of the value class A, and initializes the field of the class A to 2, and calls the method sayHello defined in the value class A which returns "Hello" concatenated with the field, so in this case it returns "Hello2".
 
 \lstinputlisting[language=tool]{BasicValueClass.tool}
 

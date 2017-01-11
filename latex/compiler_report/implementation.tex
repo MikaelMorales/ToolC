@@ -2,7 +2,7 @@ The extension involves many minor changes in every step of the pipeline and majo
 
 \subsection{Theoretical Background}
 To understand the behavior of value classes, we studied the online documentation \cite{ScalaDoc}. 
-It helps us to understand how value classes work, how they are represented in memory and their limitations. 
+It helped us to understand how value classes work, how they are represented in memory and their limitations. 
 
 \subsection{Implementation Details}
 We detail in this section the changes in the implementation.
@@ -23,8 +23,8 @@ We defined in the lexer a new keyword, \textbf{@value}, which is used to declare
 
 We upgraded the grammar to recognize a value class declaration. \newline
 A value class declaration consists of the VALUE() token, followed by CLASS() token, an identifier and the class body. \newline
-We can see here that the value class cannot extends anything. \newline
-Furthermore, we defined the instantiation of a value class A as new A(x) where x is an expression representing the field.
+We can see here that a value class cannot extend anything. \newline
+Furthermore, we defined the instantiation of a value class A as: \textbf{new A(x)} where \textbf{x} is an expression representing the field.
 
 To be able to construct the abstract syntax tree, we defined a new class declaration called ValueClassDecl. 
 Both class declarations extends a trait called Class to which a symbol is attached. \newline
@@ -52,8 +52,8 @@ methods: List[MethodDecl]) extends Class {
 \subsubsection{Name Analysis}
 We defined a trait AbstractClassSymbol which is extended by ClassSymbol and ValueClassSymbol to keep a high modularity.
 We also added a field "fieldId" to ValueClassSymbol to get the field in the Map members more easily. \newline
-We set the symbols to the classes and we check that value classes have a unique field. \newline
-Since we add the field of a value class as an argument to every method defined in this value class, we needed to make sure that there was no argument with the same name as the field, to avoid having unexpected behaviours. So we throw an error if there is an argument of a value class method with the same name as the field in this phase.
+While going through the program, we set the symbols to the classes and we checked that value classes have a unique field. \newline
+Since we added the field of a value class as an argument to every method defined in this value class, we needed to make sure that there was no arguments with the same name as the field, to avoid having unexpected behaviours. So an error is thrown if there is an argument of a value class method with the same name as the field in this phase.
 \begin{minted}{scala}
 sealed trait AbstractClassSymbol extends Symbol {
     var methods = Map[String, MethodSymbol]()
@@ -85,15 +85,15 @@ extends AbstractClassSymbol
 \end{minted}
 \newpage
 \subsubsection{Type Checking}
-Firstly, we defined a new type called TValueClass which is a subtype of itself and of TValueObject which represents the top of the value class hierarchy. \newline
-After that, we upgrade the equality type checking to allow comparison between two value classes. \newline
-Finally, we also make sure that when we instantiate value classes, the expected type of the field is satisfied. \newline
+Firstly, we defined a new type called TValueClass which is a subtype of itself and of TValueObject, which represents the top of the value class hierarchy. \newline
+After that, we upgraded the equality type checking to allow comparison between two value classes. \newline
+Finally, we also made sure that when we instantiate value classes, the expected type of the field is satisfied. \newline
 
 \subsubsection{Code Generation}
 First, we removed the default constructor for value classes. 
-Then as explained earlier, we force value classes methods to have the field as the first argument. 
+Then as explained earlier, we forced value classes methods to have the field as the first argument. 
 Since we set methods as static, they need to have access to the field. \newline
-Since conventions puts the object reference at position zero in the local variables pool, we decided to put the field of the value class instead, since there is no concrete instance of a value class when generating the bytecode. It allows us to define "this" as:
+Since conventions put the object reference at position zero in the local variables pool, we decided to put the field of the value class instead, since there is no concrete instance of a value class when generating the bytecode. It allows us to define "this" as:
 \begin{minted}{scala}
 case t@This() =>
   findRootType(t.getType) match {
@@ -146,8 +146,8 @@ If you assign a value class to a variable, only the field will be really assigne
 We first compare the name of two value classes to be sure that they are "instances" of the same value class. If they are not, we return 0. Otherwise, we compare the two fields, and return the result of the comparison.
 
 \paragraph{Method Call}
-Add the type of the field of the value class as the first argument.
-Instead of calling invokevirtual, we call InvokeStatic since methods of value class are static.
+We add the type of the field of the value class as the first argument.
+Instead of calling InvokeVirtual, we call InvokeStatic since methods of value classes are static.
 
 \paragraph{New Value Class}
 Instead of allocating the instance of the value class, we generate bytecode only for the expression of the root field.

@@ -1,8 +1,8 @@
 We actually have a fully working prototype. However our implementation is not production ready. 
-We could have a scala-like syntax for value class declaration, for example:
+We could have a scala-like syntax for value classes declarations, for example:
 \begin{lstlisting}
 class A (val x: Int) { /* Implementation */ }
 \end{lstlisting}
 Furthermore, we could define another step in the pipeline before the code generation phase. 
-In this new stage we would have modified the value classes method's signature to add the field instead of doing it in the code generation. 
+In this new stage we would have modified the value classes method's signatures to add the field instead of doing it in the code generation. 
 This would make these changes more localized and also lighten the code generation phase.
